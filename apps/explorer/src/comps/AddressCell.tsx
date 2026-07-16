@@ -31,7 +31,6 @@ export function AddressCell(props: {
 		<Link
 			to="/address/$address"
 			params={{ address }}
-			preload="intent"
 			className={cx(
 				'text-[13px] text-accent hover:text-accent/80 transition-colors press-down w-full font-mono',
 				isHighlighted && 'underline',

@@ -7,6 +7,7 @@ const canonicalTempoEnvSchema = z.union([
 	z.literal('nextfork'),
 	z.literal('testnet'),
 	z.literal('mainnet'),
+	z.literal('thaichain'),
 ])
 
 export const tempoEnvSchema = z.prefault(

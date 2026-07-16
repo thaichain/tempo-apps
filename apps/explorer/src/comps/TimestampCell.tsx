@@ -12,11 +12,7 @@ export function TimestampCell(props: {
 	if (link) {
 		return (
 			<div className="text-nowrap">
-				<Link
-					to={link}
-					preload="intent"
-					className="text-tertiary hover:text-secondary"
-				>
+				<Link to={link} className="text-tertiary hover:text-secondary">
 					<FormattedTimestamp timestamp={timestamp} format={format} />
 				</Link>
 			</div>

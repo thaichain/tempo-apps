@@ -16,7 +16,7 @@ import { Hooks } from 'wagmi/tempo'
 import { useTokenListMembership } from '#comps/TokenListMembership'
 import { cx } from '#lib/css'
 import { getApiUrl } from '#lib/env.ts'
-import { getFeeTokenForChain } from '#lib/fee-token'
+import { getFeeTokenForChain } from '#lib/tokenlist'
 import { filterSupportedInjectedConnectors } from '#lib/wallets.ts'
 import { getTempoChain } from '#wagmi.config.ts'
 import LucideLogOut from '~icons/lucide/log-out'
@@ -144,17 +144,21 @@ function ConnectWalletInner({
 								...(blockExplorerUrl
 									? { blockExplorerUrls: [blockExplorerUrl] }
 									: {}),
-								nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+								nativeCurrency: {
+									name: 'Thaichain',
+									decimals: 18,
+									symbol: 'THAI',
+								},
 							},
 						})
 					}
 				>
-					Add Tempo to {connector?.name ?? 'Wallet'}
+					Add Thaichain to {connector?.name ?? 'Wallet'}
 				</Button>
 			)}
 			{switchChain.isSuccess && (
 				<span className="text-[12px] font-normal text-tertiary whitespace-nowrap">
-					Added Tempo to {connector?.name ?? 'Wallet'}!
+					Added Thaichain to {connector?.name ?? 'Wallet'}!
 				</span>
 			)}
 			<SignOut />

@@ -5,7 +5,6 @@ import {
 	createFileRoute,
 	notFound,
 	rootRouteId,
-	useLocation,
 	useNavigate,
 } from '@tanstack/react-router'
 import * as Address from 'ox/Address'
@@ -25,7 +24,6 @@ import {
 } from '#lib/domain/known-events'
 import { calculateKnownEventsTotal } from '#lib/domain/known-event-totals'
 import { getFeeBreakdown, LineItems } from '#lib/domain/receipt'
-import { buildTxSummary } from '#lib/domain/tx-summary'
 import * as Tip20 from '#lib/domain/tip20'
 import { DateFormatter, PriceFormatter } from '#lib/formatting'
 import { useKeyboardShortcut } from '#lib/hooks'
@@ -36,7 +34,7 @@ import {
 } from '#lib/og'
 import { areUsdPricedTokens, hasTokenAmount } from '#lib/pricing'
 import { withLoaderTiming } from '#lib/profiling'
-import { getFeeTokenForChain } from '#lib/fee-token'
+import { getFeeTokenForChain } from '#lib/tokenlist'
 import { getTempoChain, getWagmiConfig } from '#wagmi.config.ts'
 
 const TEMPO_CHAIN_ID = getTempoChain().id
@@ -250,29 +248,12 @@ export const Route = createFileRoute('/_layout/receipt/$hash')({
 				if (type === 'application/json') {
 					if (!hash)
 						return Response.json({ error: 'Not found' }, { status: 404 })
-					const data = await fetchReceiptData({
+					const { lineItems, receipt } = await fetchReceiptData({
 						hash,
 						rpcUrl,
 					})
-					const summary = buildTxSummary({
-						receipt: data.receipt,
-						transaction: data.transaction,
-						knownEvents: data.knownEvents,
-						trace: null,
-					})
 					return Response.json(
-						JSON.parse(
-							Json.stringify({
-								version: 1,
-								summary,
-								block: data.block,
-								transaction: data.transaction,
-								receipt: data.receipt,
-								knownEvents: data.knownEvents,
-								feeBreakdown: data.feeBreakdown,
-								lineItems: data.lineItems,
-							}),
-						),
+						JSON.parse(Json.stringify({ lineItems, receipt })),
 					)
 				}
 
@@ -414,7 +395,6 @@ function parseVoucherParam(
 function Component() {
 	const { hash } = Route.useParams()
 	const { voucher: voucherRaw } = Route.useSearch()
-	const location = useLocation()
 	const navigate = useNavigate()
 	const loaderData = Route.useLoaderData() as Awaited<
 		ReturnType<typeof fetchReceiptData>
@@ -543,7 +523,6 @@ function Component() {
 				timestamp={block.timestamp}
 				total={total}
 				totalDisplay={totalDisplay}
-				exportSearch={location.searchStr}
 			/>
 		</div>
 	)
@@ -596,14 +575,7 @@ namespace TextRenderer {
 	const indent = '  '
 
 	export function render(data: Awaited<ReturnType<typeof fetchReceiptData>>) {
-		const { knownEvents, lineItems, receipt, timestampFormatted, transaction } =
-			data
-		const summary = buildTxSummary({
-			receipt,
-			transaction,
-			knownEvents,
-			trace: null,
-		})
+		const { lineItems, receipt, timestampFormatted } = data
 
 		const lines: string[] = []
 
@@ -616,7 +588,6 @@ namespace TextRenderer {
 		lines.push(`Date: ${timestampFormatted}`)
 		lines.push(`Block: ${receipt.blockNumber.toString()}`)
 		lines.push(`Sender: ${receipt.from}`)
-		lines.push(`Summary: ${summary.headline}`)
 		lines.push('')
 		lines.push('-'.repeat(width))
 		lines.push('')

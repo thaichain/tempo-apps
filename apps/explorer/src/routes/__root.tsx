@@ -16,14 +16,8 @@ import { BreadcrumbsProvider } from '#comps/Breadcrumbs'
 import { ErrorBoundary } from '#comps/ErrorBoundary'
 import { IntroSeenProvider } from '#comps/Intro'
 import { TokenListMembershipProvider } from '#comps/TokenListMembership'
-import {
-	getCanonicalExplorerUrl,
-	getExplorerWebApplication,
-} from '#lib/explorer-indexing'
-import { getRequestURL, getTempoEnv } from '#lib/env'
 import { OG_BASE_URL } from '#lib/og'
 import { ProgressLine } from '#comps/ProgressLine'
-import { defaultThemeMode, themeBootScript } from '#lib/theme'
 import {
 	type LoaderTiming,
 	captureEvent,
@@ -35,37 +29,6 @@ import {
 import { initDatadogRum } from '#lib/telemetry/datadog'
 import { getWagmiConfig, getWagmiStateSSR } from '#wagmi.config.ts'
 import css from './styles.css?url'
-
-function getCurrentCanonicalExplorerUrl(): string | undefined {
-	const pathname =
-		typeof window === 'undefined'
-			? getRequestURL().pathname
-			: window.location.pathname
-	return getCanonicalExplorerUrl(getTempoEnv(), pathname)
-}
-
-function getExplorerCanonicalLinks() {
-	const href = getCurrentCanonicalExplorerUrl()
-	return href ? [{ rel: 'canonical', href }] : []
-}
-
-function getExplorerRobotsMeta() {
-	return getCurrentCanonicalExplorerUrl()
-		? []
-		: [{ name: 'robots', content: 'noindex, nofollow' }]
-}
-
-function getExplorerWebApplicationScripts() {
-	const webApplication = getExplorerWebApplication(getTempoEnv())
-	return webApplication
-		? [
-				{
-					children: JSON.stringify(webApplication),
-					type: 'application/ld+json',
-				},
-			]
-		: []
-}
 
 export const Route = createRootRouteWithContext<{
 	queryClient: QueryClient
@@ -80,11 +43,11 @@ export const Route = createRootRouteWithContext<{
 				content: 'width=device-width, initial-scale=1',
 			},
 			{
-				title: 'Explore - Tempo',
+				title: 'Thaichain Explorer',
 			},
 			{
 				name: 'og:title',
-				content: 'Explore - Tempo',
+				content: 'Thaichain Explorer',
 			},
 			{
 				name: 'viewport',
@@ -93,12 +56,12 @@ export const Route = createRootRouteWithContext<{
 			{
 				name: 'description',
 				content:
-					'Explore and analyze blocks, transactions, contracts and more on Tempo.',
+					'Explore and analyze blocks, transactions, contracts and more on Thaichain.',
 			},
 			{
 				name: 'og:description',
 				content:
-					'Explore and analyze blocks, transactions, contracts and more on Tempo.',
+					'Explore and analyze blocks, transactions, contracts and more on Thaichain.',
 			},
 			{
 				name: 'og:image',
@@ -124,10 +87,8 @@ export const Route = createRootRouteWithContext<{
 				name: 'twitter:image',
 				content: `${OG_BASE_URL}/explorer`,
 			},
-			...getExplorerRobotsMeta(),
 		],
 		links: [
-			...getExplorerCanonicalLinks(),
 			{
 				rel: 'preload',
 				href: '/fonts/satoshi/Satoshi-Variable.woff2',
@@ -149,50 +110,26 @@ export const Route = createRootRouteWithContext<{
 			{
 				rel: 'icon',
 				type: 'image/svg+xml',
-				href: '/favicon-light.svg',
-				media: '(prefers-color-scheme: light)',
-			},
-			{
-				rel: 'icon',
-				type: 'image/svg+xml',
 				href: '/favicon-dark.svg',
-				media: '(prefers-color-scheme: dark)',
-			},
-			{
-				rel: 'icon',
-				type: 'image/png',
-				sizes: '32x32',
-				href: '/favicon-32x32-light.png',
-				media: '(prefers-color-scheme: light)',
 			},
 			{
 				rel: 'icon',
 				type: 'image/png',
 				sizes: '32x32',
 				href: '/favicon-32x32-dark.png',
-				media: '(prefers-color-scheme: dark)',
-			},
-			{
-				rel: 'icon',
-				type: 'image/png',
-				sizes: '16x16',
-				href: '/favicon-16x16-light.png',
-				media: '(prefers-color-scheme: light)',
 			},
 			{
 				rel: 'icon',
 				type: 'image/png',
 				sizes: '16x16',
 				href: '/favicon-16x16-dark.png',
-				media: '(prefers-color-scheme: dark)',
 			},
 			{
 				rel: 'apple-touch-icon',
 				sizes: '180x180',
-				href: '/favicon-light.png',
+				href: '/favicon-dark.png',
 			},
 		],
-		scripts: getExplorerWebApplicationScripts(),
 	}),
 	scripts: async () => {
 		const scripts: Array<{ children: string; type: string }> = []
@@ -208,14 +145,7 @@ export const Route = createRootRouteWithContext<{
 			type: 'text/javascript',
 		})
 
-		if (import.meta.env.PROD) {
-			scripts.push({
-				// PostHog analytics - deferred to avoid blocking initial render
-				children: `!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-(window.requestIdleCallback||function(cb){setTimeout(cb,50)})(function(){posthog.init('phc_aNlTw2xAUQKd9zTovXeYheEUpQpEhplehCK5r1e31HR',{api_host:'https://us.i.posthog.com',defaults:'2025-11-30',disable_session_recording:true})});`,
-				type: 'text/javascript',
-			})
-		}
+		// PostHog disabled for Thaichain (was hardcoded Tempo project key)
 
 		return scripts
 	},
@@ -438,14 +368,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	})
 
 	return (
-		<html
-			lang="en"
-			className="scrollbar-gutter-stable"
-			data-theme={defaultThemeMode}
-			suppressHydrationWarning
-		>
+		<html lang="en" className="scrollbar-gutter-stable">
 			<head>
-				<script>{themeBootScript}</script>
 				<HeadContent />
 			</head>
 			<body className="antialiased">

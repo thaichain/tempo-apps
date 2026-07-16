@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import type { Address } from 'ox'
 import {
-	fetchAccountTransfers,
+	fetchFirstTransfer,
 	fetchHolders,
 	fetchTransfers,
 } from '#lib/server/token.ts'
@@ -13,6 +13,7 @@ export type TransfersQueryParams = {
 	address: Address.Address
 	page: number
 	limit: number
+	offset: number
 	account?: Address.Address | undefined
 	_key?: string | undefined
 }
@@ -21,6 +22,7 @@ export type HoldersQueryParams = {
 	address: Address.Address
 	page: number
 	limit: number
+	offset: number
 }
 
 export function transfersQueryOptions(params: TransfersQueryParams) {
@@ -37,29 +39,9 @@ export function transfersQueryOptions(params: TransfersQueryParams) {
 			const data = await fetchTransfers({
 				data: {
 					address: params.address,
-					page: params.page,
+					offset: params.offset,
 					limit: params.limit,
 					account: params.account,
-				},
-			})
-			return data
-		},
-	})
-}
-
-export function accountTransfersQueryOptions(params: {
-	account: Address.Address
-	page: number
-	limit: number
-}) {
-	return queryOptions({
-		queryKey: ['account-transfers', params.account, params.page, params.limit],
-		queryFn: async () => {
-			const data = await fetchAccountTransfers({
-				data: {
-					account: params.account,
-					page: params.page,
-					limit: params.limit,
 				},
 			})
 			return data
@@ -74,7 +56,7 @@ export function holdersQueryOptions(params: HoldersQueryParams) {
 			const data = await fetchHolders({
 				data: {
 					address: params.address,
-					page: params.page,
+					offset: params.offset,
 					limit: params.limit,
 				},
 			})
@@ -83,16 +65,32 @@ export function holdersQueryOptions(params: HoldersQueryParams) {
 	})
 }
 
+export function firstTransferQueryOptions(params: {
+	address: Address.Address
+}) {
+	return queryOptions({
+		queryKey: ['token-first-transfer', params.address],
+		queryFn: async () => {
+			const data = await fetchFirstTransfer({
+				data: { address: params.address },
+			})
+			return data
+		},
+		staleTime: 60_000,
+	})
+}
+
 export function tokensListQueryOptions(params: {
 	page: number
 	limit: number
 }) {
+	const offset = (params.page - 1) * params.limit
 	return queryOptions({
 		queryKey: ['tokens', params.page, params.limit],
 		queryFn: () =>
 			fetchTokens({
 				data: {
-					page: params.page,
+					offset,
 					limit: params.limit,
 				},
 			}),

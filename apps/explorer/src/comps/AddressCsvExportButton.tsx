@@ -3,6 +3,7 @@ import * as React from 'react'
 
 import { cx } from '#lib/css'
 import { getApiUrl } from '#lib/env.ts'
+import type { HistorySources } from '#lib/queries/account'
 import DownloadIcon from '~icons/lucide/download'
 
 function getDownloadFilename(
@@ -22,6 +23,7 @@ export function AddressCsvExportButton(
 	const status = kind === 'transactions' ? props.status : undefined
 	const include = kind === 'transactions' ? props.include : 'all'
 	const after = kind === 'transactions' ? props.after : undefined
+	const sources = kind === 'transactions' ? props.sources : []
 	const [isExporting, setIsExporting] = React.useState(false)
 	const [error, setError] = React.useState<string | null>(null)
 
@@ -46,6 +48,9 @@ export function AddressCsvExportButton(
 				if (status) searchParams.set('status', status)
 				if (include !== 'all') searchParams.set('include', include)
 				if (after) searchParams.set('after', String(after))
+				if (sources.length > 0) {
+					searchParams.set('sources', sources.join(','))
+				}
 			}
 
 			url.search = searchParams.toString()
@@ -79,7 +84,7 @@ export function AddressCsvExportButton(
 		} finally {
 			setIsExporting(false)
 		}
-	}, [address, after, include, kind, status])
+	}, [address, after, include, kind, sources, status])
 
 	return (
 		<div className="flex flex-col gap-[4px] min-[800px]:items-end">
@@ -125,5 +130,6 @@ export declare namespace AddressCsvExportButton {
 				status?: 'success' | 'reverted' | undefined
 				include: 'all' | 'sent' | 'received'
 				after?: number | undefined
+				sources: ReadonlyArray<HistorySources>
 		  }
 }
