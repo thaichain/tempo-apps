@@ -5,18 +5,19 @@ import {
 	isExplorerNetworkPathPreservable,
 } from '#lib/explorer-network.ts'
 
-const MAINNET_HOST = 'https://explore.tempo.xyz'
-const TESTNET_HOST = 'https://explore.testnet.tempo.xyz'
+const THAICHAIN_HOST = 'https://exp.thaichain.org'
 
 const SAMPLE_HASH =
 	'0x0000000000000000000000000000000000000000000000000000000000000000'
 const SAMPLE_ADDRESS = '0x20c0000000000000000000000000000000000000'
 
 describe('explorer network switcher hrefs', () => {
-	it('uses the canonical mainnet and testnet explorer hosts', () => {
+	it('uses the Thaichain explorer host', () => {
 		expect(EXPLORER_NETWORK_OPTIONS).toEqual([
-			expect.objectContaining({ env: 'mainnet', host: MAINNET_HOST }),
-			expect.objectContaining({ env: 'testnet', host: TESTNET_HOST }),
+			expect.objectContaining({
+				env: 'thaichain',
+				host: THAICHAIN_HOST,
+			}),
 		])
 	})
 
@@ -28,17 +29,14 @@ describe('explorer network switcher hrefs', () => {
 		['token compatibility route', `/token/${SAMPLE_ADDRESS}?tab=holders`],
 		['fee amm route with hash', '/fee-amm#pools'],
 	])('preserves the %s resource path when switching networks', (_, path) => {
-		expect(buildExplorerNetworkHref(MAINNET_HOST, path)).toBe(
-			`${MAINNET_HOST}${path}`,
-		)
-		expect(buildExplorerNetworkHref(TESTNET_HOST, path)).toBe(
-			`${TESTNET_HOST}${path}`,
+		expect(buildExplorerNetworkHref(THAICHAIN_HOST, path)).toBe(
+			`${THAICHAIN_HOST}${path}`,
 		)
 	})
 
 	it('normalizes a path without a leading slash', () => {
-		expect(buildExplorerNetworkHref(TESTNET_HOST, 'blocks')).toBe(
-			`${TESTNET_HOST}/blocks`,
+		expect(buildExplorerNetworkHref(THAICHAIN_HOST, 'blocks')).toBe(
+			`${THAICHAIN_HOST}/blocks`,
 		)
 	})
 
@@ -50,11 +48,14 @@ describe('explorer network switcher hrefs', () => {
 			isExplorerNetworkPathPreservable(`/tx/${SAMPLE_HASH}?tab=logs#top`),
 		).toBe(true)
 		expect(
-			buildExplorerNetworkHref(TESTNET_HOST, `/receipt/${SAMPLE_HASH}`),
-		).toBe(`${TESTNET_HOST}/receipt/${SAMPLE_HASH}`)
+			buildExplorerNetworkHref(THAICHAIN_HOST, `/receipt/${SAMPLE_HASH}`),
+		).toBe(`${THAICHAIN_HOST}/receipt/${SAMPLE_HASH}`)
 		expect(
-			buildExplorerNetworkHref(MAINNET_HOST, `/tx/${SAMPLE_HASH}?tab=logs#top`),
-		).toBe(`${MAINNET_HOST}/tx/${SAMPLE_HASH}?tab=logs#top`)
+			buildExplorerNetworkHref(
+				THAICHAIN_HOST,
+				`/tx/${SAMPLE_HASH}?tab=logs#top`,
+			),
+		).toBe(`${THAICHAIN_HOST}/tx/${SAMPLE_HASH}?tab=logs#top`)
 	})
 
 	it('still links unknown not-found routes to the target network homepage', () => {
@@ -62,9 +63,9 @@ describe('explorer network switcher hrefs', () => {
 			false,
 		)
 		expect(
-			buildExplorerNetworkHref(TESTNET_HOST, '/definitely-not-a-route', {
+			buildExplorerNetworkHref(THAICHAIN_HOST, '/definitely-not-a-route', {
 				fallbackToHome: true,
 			}),
-		).toBe(`${TESTNET_HOST}/`)
+		).toBe(`${THAICHAIN_HOST}/`)
 	})
 })

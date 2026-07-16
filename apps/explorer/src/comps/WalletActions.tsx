@@ -56,7 +56,11 @@ export function WalletActions(
 			switchChain.mutate({
 				chainId: TEMPO_CHAIN_ID,
 				addEthereumChainParameter: {
-					nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+					nativeCurrency: {
+						name: 'Thaichain',
+						decimals: 18,
+						symbol: 'THAI',
+					},
 				},
 			})
 		}
@@ -69,7 +73,7 @@ export function WalletActions(
 			? 'Switching network…'
 			: !isConnected
 				? `Connect ${walletName}`
-				: `Switch to Tempo`
+				: `Switch to Thaichain`
 
 	return (
 		<InfoCard

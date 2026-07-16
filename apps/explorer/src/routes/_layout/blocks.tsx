@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import * as React from 'react'
-import { type Block, createPublicClient, webSocket } from 'viem'
-import { watchBlocks as subscribeToBlocks } from 'viem/actions'
-import { getTempoChain } from '#wagmi.config'
+import type { Block } from 'viem'
+import { getBlock } from 'wagmi/actions'
+import { getWagmiConfig } from '#wagmi.config'
 import * as z from 'zod/mini'
 import { DataGrid } from '#comps/DataGrid'
 import { Midcut } from '#comps/Midcut'
@@ -13,7 +13,7 @@ import {
 	TimeColumnHeader,
 	useTimeFormat,
 } from '#comps/TimeFormat'
-import { syncBlockNumberAtLeast } from '#lib/block-number'
+import { syncBlockNumberAtLeast, useLiveBlockNumber } from '#lib/block-number'
 import { cx } from '#lib/css'
 import { OG_BASE_URL } from '#lib/og'
 import { withLoaderTiming } from '#lib/profiling'
@@ -23,6 +23,9 @@ import ChevronLast from '~icons/lucide/chevron-last'
 import ChevronLeft from '~icons/lucide/chevron-left'
 import ChevronRight from '~icons/lucide/chevron-right'
 import Play from '~icons/lucide/play'
+
+// Track which block numbers are "new" for animation purposes
+const recentlyAddedBlocks = new Set<string>()
 
 export const Route = createFileRoute('/_layout/blocks')({
 	component: RouteComponent,
@@ -82,68 +85,95 @@ function RouteComponent() {
 	)
 	const { timeFormat, cycleTimeFormat, formatLabel } = useTimeFormat()
 	const [paused, setPaused] = React.useState(false)
-	const pausedRef = React.useRef(paused)
-	pausedRef.current = paused
-	const pendingBlocksRef = React.useRef<Block[]>([])
-
-	const mergeBlocks = React.useCallback((incoming: Block[]) => {
-		if (incoming.length === 0) return
-		setLiveBlocks((prev) => {
-			const existing = new Set(prev.map((b) => b.number))
-			const toAdd = incoming.filter(
-				(b) => b.number != null && !existing.has(b.number),
-			)
-			if (toAdd.length === 0) return prev
-			return [...toAdd, ...prev]
-				.sort((a, b) => Number(b.number) - Number(a.number))
-				.slice(0, BLOCKS_PER_PAGE)
-		})
-	}, [])
+	const queryClient = useQueryClient()
+	const wagmiConfig = React.useMemo(() => getWagmiConfig(), [])
+	const fetchingBlocksRef = React.useRef(new Set<bigint>())
+	const lastHandledBlockRef = React.useRef<bigint | null>(null)
+	const liveBlockNumber = useLiveBlockNumber()
 
 	React.useEffect(() => {
 		syncBlockNumberAtLeast(queryData.latestBlockNumber)
 	}, [queryData.latestBlockNumber])
 
-	// Live feed: stream new blocks over a WebSocket subscription (eth_subscribe
-	// newHeads) — viem hydrates each head into a full block (incl. tx hashes) via
-	// getBlock. While paused (hover) we buffer incoming blocks and flush them on
-	// resume so the view stays frozen.
+	// Watch for new blocks and fetch any missing blocks
 	React.useEffect(() => {
-		if (!live || !isAtLatest) return
+		if (liveBlockNumber == null) return
+		if (lastHandledBlockRef.current === liveBlockNumber) return
+		lastHandledBlockRef.current = liveBlockNumber
 
-		const chain = getTempoChain()
-		const wsUrl = (chain.rpcUrls.default as { webSocket?: readonly string[] })
-			.webSocket?.[0]
-		if (!wsUrl) return
+		const handleBlock = async () => {
+			if (
+				latestBlockNumber !== undefined &&
+				liveBlockNumber <= latestBlockNumber
+			) {
+				return
+			}
 
-		const client = createPublicClient({ chain, transport: webSocket(wsUrl) })
-		return subscribeToBlocks(client, {
-			onBlock: (block) => {
-				const number = block.number
-				if (number != null) {
-					setLatestBlockNumber((prev) =>
-						prev == null || number > prev ? number : prev,
-					)
-					syncBlockNumberAtLeast(number)
+			setLatestBlockNumber(liveBlockNumber)
+
+			if (!live || !isAtLatest || paused) return
+
+			// Determine which blocks we need to fetch
+			const currentHighest = liveBlocks[0]?.number
+			const startBlock =
+				currentHighest != null ? currentHighest + 1n : liveBlockNumber
+			const blocksToFetch: bigint[] = []
+
+			for (let bn = startBlock; bn <= liveBlockNumber; bn++) {
+				if (!fetchingBlocksRef.current.has(bn)) {
+					blocksToFetch.push(bn)
+					fetchingBlocksRef.current.add(bn)
 				}
-				if (pausedRef.current) {
-					pendingBlocksRef.current.push(block)
-					return
-				}
-				const buffered = pendingBlocksRef.current
-				pendingBlocksRef.current = []
-				mergeBlocks([...buffered, block])
-			},
-		})
-	}, [live, isAtLatest, mergeBlocks])
+			}
 
-	// Flush blocks buffered during a pause as soon as we resume.
-	React.useEffect(() => {
-		if (paused || pendingBlocksRef.current.length === 0) return
-		const buffered = pendingBlocksRef.current
-		pendingBlocksRef.current = []
-		mergeBlocks(buffered)
-	}, [paused, mergeBlocks])
+			if (blocksToFetch.length === 0) return
+
+			const newBlocks = await Promise.all(
+				blocksToFetch.map((bn) =>
+					queryClient.fetchQuery({
+						queryKey: ['block', bn.toString()],
+						queryFn: () => getBlock(wagmiConfig, { blockNumber: bn }),
+						staleTime: Number.POSITIVE_INFINITY,
+					}),
+				),
+			)
+
+			for (const bn of blocksToFetch) {
+				fetchingBlocksRef.current.delete(bn)
+			}
+
+			const validBlocks = newBlocks.filter(Boolean) as Block[]
+			if (validBlocks.length === 0) return
+
+			setLiveBlocks((prev) => {
+				const existingNumbers = new Set(prev.map((b) => b.number))
+				const toAdd = validBlocks.filter((b) => !existingNumbers.has(b.number))
+
+				for (const block of toAdd) {
+					const blockNum = block.number?.toString()
+					if (blockNum) {
+						recentlyAddedBlocks.add(blockNum)
+						setTimeout(() => recentlyAddedBlocks.delete(blockNum), 400)
+					}
+				}
+
+				return [...toAdd, ...prev]
+					.sort((a, b) => Number(b.number) - Number(a.number))
+					.slice(0, BLOCKS_PER_PAGE)
+			})
+		}
+
+		void handleBlock()
+	}, [
+		isAtLatest,
+		live,
+		liveBlockNumber,
+		latestBlockNumber,
+		liveBlocks,
+		paused,
+		queryClient,
+		wagmiConfig,
+	])
 
 	// Re-initialize when navigating back to latest with live mode
 	React.useEffect(() => {
@@ -249,14 +279,13 @@ function RouteComponent() {
 								<DataGrid
 									columns={{ stacked: columns, tabs: columns }}
 									items={() =>
-										blocks.map((block, index) => {
+										blocks.map((block) => {
 											const blockNumber = block.number?.toString() ?? '0'
 											const blockHash = block.hash ?? '0x'
 											const txCount = block.transactions?.length ?? 0
-											const isActive = isAtLatest && live && index === 0
+											const isNew = recentlyAddedBlocks.has(blockNumber)
 
 											return {
-												key: `block-${blockNumber}`,
 												cells: [
 													<span
 														key="number"
@@ -287,7 +316,7 @@ function RouteComponent() {
 													href: `/block/${blockNumber}`,
 													title: `View block #${blockNumber}`,
 												},
-												className: isActive ? 'block-row-shimmer' : undefined,
+												className: isNew ? 'bg-positive/5' : undefined,
 											}
 										})
 									}

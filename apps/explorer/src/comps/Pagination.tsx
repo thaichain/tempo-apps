@@ -241,7 +241,6 @@ export namespace Pagination {
 		const {
 			page,
 			pages,
-			pagesCapped = false,
 			fetching,
 			countLoading,
 			disableLastPage,
@@ -249,23 +248,9 @@ export namespace Pagination {
 			onCancelPrefetchNext,
 		} = props
 		const isIndefinite = typeof pages !== 'number'
-
-		// When capped, `pages` reflects the cap (e.g. 1,000) but its final page
-		// isn't addressable upstream, so show it as "1,000+" and clamp navigation
-		// to `pages - 1` (the last requestable page).
-		const totalPagesLabel =
-			isIndefinite || countLoading
-				? '…'
-				: typeof pages === 'number' && pages > 0
-					? pagesCapped
-						? `${Pagination.numFormat.format(pages)}+`
-						: Pagination.numFormat.format(pages)
-					: '…'
 		const disableNext = isIndefinite
 			? !(pages as { hasMore: boolean } | undefined)?.hasMore
-			: pagesCapped
-				? page >= pages - 1
-				: page >= pages
+			: page >= pages
 
 		const handlePrefetchNext = () => {
 			if (disableNext) return
@@ -311,7 +296,11 @@ export namespace Pagination {
 						{Pagination.numFormat.format(page)}
 					</span>
 					{' of '}
-					{totalPagesLabel}
+					{isIndefinite || countLoading
+						? '…'
+						: typeof pages === 'number' && pages > 0
+							? Pagination.numFormat.format(pages)
+							: '…'}
 				</span>
 				<Link
 					to="."
@@ -332,7 +321,7 @@ export namespace Pagination {
 				>
 					<ChevronRight className="size-[14px]" />
 				</Link>
-				{typeof pages === 'number' && !pagesCapped && (
+				{typeof pages === 'number' && (
 					<Link
 						to="."
 						resetScroll={false}
@@ -355,8 +344,6 @@ export namespace Pagination {
 			page: number
 			/** Total pages (number) or indefinite pagination ({ hasMore: boolean }) */
 			pages?: number | { hasMore: boolean }
-			/** Show the total page count as a capped value (e.g. "1,000+"). */
-			pagesCapped?: boolean
 			fetching?: boolean
 			countLoading?: boolean
 			/** Disable "Last page" button when we can't reliably navigate there */

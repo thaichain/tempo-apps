@@ -35,7 +35,6 @@ import { TxTransactionCard } from '#comps/TxTransactionCard'
 import { cx } from '#lib/css'
 import { apostrophe } from '#lib/chars'
 import type { KnownEvent } from '#lib/domain/known-events'
-import { buildTxSummary } from '#lib/domain/tx-summary'
 import {
 	type EventGroup,
 	groupRelatedEvents,
@@ -206,17 +205,6 @@ function RouteComponent() {
 				}>)
 			: undefined
 	const hasCalls = Boolean(calls && calls.length > 0)
-	const summary = React.useMemo(
-		() =>
-			buildTxSummary({
-				receipt,
-				transaction,
-				knownEvents,
-				trace: traceData.trace,
-				balanceChangesData,
-			}),
-		[receipt, knownEvents, traceData.trace, balanceChangesData, transaction],
-	)
 
 	const setActiveSection = (newIndex: number) => {
 		navigate({
@@ -313,21 +301,18 @@ function RouteComponent() {
 			<TxTransactionCard
 				hash={receipt.transactionHash}
 				status={receipt.status}
-				error={summary.error}
 				blockNumber={receipt.blockNumber}
 				timestamp={block.timestamp}
 				from={receipt.from}
 				to={receipt.to}
 				className="self-start"
 			/>
-			<div className="flex min-w-0 flex-col gap-[14px]">
-				<Sections
-					mode={mode}
-					sections={sections}
-					activeSection={activeSection}
-					onSectionChange={setActiveSection}
-				/>
-			</div>
+			<Sections
+				mode={mode}
+				sections={sections}
+				activeSection={activeSection}
+				onSectionChange={setActiveSection}
+			/>
 		</div>
 	)
 }

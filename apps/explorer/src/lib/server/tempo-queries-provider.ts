@@ -1,8 +1,11 @@
 import { QB, Tidx } from 'tidx.ts'
-import { tempoApiUrl } from './env'
+import { serverEnv } from './env'
 
+// Hardcoded for Thaichain: Cloudflare Workers `vars` are injected into the
+// request `env` parameter, not `process.env` at module load time.
 const tidx = Tidx.create({
-	baseUrl: `${tempoApiUrl}/v1/indexer`,
+	basicAuth: serverEnv.TIDX_BASIC_AUTH,
+	baseUrl: 'https://tidx.thaichain.org',
 })
 
 tidx.on('response', (res) => {
@@ -15,12 +18,17 @@ tidx.on('response', (res) => {
 					`[tidx:${res.status}]`,
 					decodeURIComponent(res.url),
 					body,
+					`(auth=${serverEnv.TIDX_BASIC_AUTH ? 'set' : 'missing'})`,
 				),
 			)
 })
 
 export function tempoQueryBuilder(chainId: number) {
 	return QB.from({ ...tidx, chainId })
+}
+
+export function tempoFastLookupQueryBuilder(chainId: number) {
+	return QB.from({ ...tidx, chainId, engine: 'clickhouse' })
 }
 
 export { tidx }

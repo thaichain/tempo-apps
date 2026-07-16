@@ -20,10 +20,12 @@ export const Route = createFileRoute('/api/address/balances/$address')({
 					const url = getRequestURL()
 					const isCsvExport = url.searchParams.get('format') === 'csv'
 					const address = zAddress().parse(params.address)
-					const chainId = getChainId(getWagmiConfig())
+					const config = getWagmiConfig()
+					const chainId = getChainId(config)
 					const response = await fetchAddressBalancesData({
 						address,
 						chainId,
+						config,
 						maxTokens: MAX_TOKENS,
 					})
 

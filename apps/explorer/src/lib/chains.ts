@@ -1,3 +1,4 @@
+import { defineChain } from 'viem'
 import { tempoDevnet as tempoDevnet_, tempo, tempoModerato } from 'viem/chains'
 
 export const tempoMainnet = tempo.extend({
@@ -19,4 +20,26 @@ export const tempoNextfork = tempoDevnet_.extend({
 			http: ['https://rpc-nextfork.devnet.tempoxyz.dev'],
 		},
 	},
+})
+
+export const thaiChain = defineChain({
+	id: 7,
+	name: 'Thaichain',
+	nativeCurrency: {
+		name: 'Thaichain',
+		symbol: 'THAI',
+		decimals: 18,
+	},
+	rpcUrls: {
+		default: {
+			http: ['https://rpc.thaichain.org'],
+		},
+	},
+	blockExplorers: {
+		default: {
+			name: 'Thaichain Explorer',
+			url: 'https://exp.thaichain.org',
+		},
+	},
+	feeToken: '0x20c0000000000000000000000000000000000000',
 })

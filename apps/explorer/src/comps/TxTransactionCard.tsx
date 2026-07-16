@@ -8,8 +8,7 @@ import { useCopy } from '#lib/hooks'
 import CopyIcon from '~icons/lucide/copy'
 
 export function TxTransactionCard(props: TxTransactionCard.Props) {
-	const { hash, status, error, blockNumber, timestamp, from, to, className } =
-		props
+	const { hash, status, blockNumber, timestamp, from, to, className } = props
 	const { copy, notifying } = useCopy()
 	const { timeFormat, cycleTimeFormat, formatLabel } = useTimeFormat()
 	return (
@@ -21,18 +20,6 @@ export function TxTransactionCard(props: TxTransactionCard.Props) {
 					label: 'Status',
 					value: <StatusBadge status={status} />,
 				},
-				...(status === 'reverted' && error
-					? [
-							{
-								label: 'Error',
-								value: (
-									<span className="text-right font-sans text-[13px] text-primary">
-										{error}
-									</span>
-								),
-							},
-						]
-					: []),
 				<button
 					key="hash"
 					type="button"
@@ -162,7 +149,6 @@ export declare namespace TxTransactionCard {
 	type Props = {
 		hash: Hex.Hex
 		status: 'success' | 'reverted'
-		error?: string | undefined
 		blockNumber: bigint
 		timestamp: bigint
 		from: Address.Address

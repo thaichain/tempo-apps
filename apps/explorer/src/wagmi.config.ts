@@ -4,9 +4,13 @@ import { createPublicClient } from 'viem'
 import { tempoDevnet, tempoLocalnet } from 'viem/chains'
 import { tempoActions } from 'viem/tempo'
 import { loadBalance, rateLimit } from '@tempo/rpc-utils'
-import { tempoMainnet, tempoNextfork, tempoTestnet } from './lib/chains'
+import {
+	tempoMainnet,
+	tempoNextfork,
+	tempoTestnet,
+	thaiChain,
+} from './lib/chains'
 import { getTempoEnv } from './lib/env'
-import { serverEnv, tempoApiUrl } from './lib/server/env'
 import {
 	cookieStorage,
 	cookieToInitialState,
@@ -22,57 +26,53 @@ let wagmiConfigSingleton: ReturnType<typeof createConfig> | null = null
 
 export const getTempoChain = createIsomorphicFn()
 	.client(() =>
-		getTempoEnv() === 'mainnet'
-			? tempoMainnet
-			: getTempoEnv() === 'nextfork'
-				? tempoNextfork
-				: getTempoEnv() === 'devnet'
-					? tempoDevnet
-					: getTempoEnv() === 'testnet'
-						? tempoTestnet
-						: tempoMainnet,
+		getTempoEnv() === 'thaichain'
+			? thaiChain
+			: getTempoEnv() === 'mainnet'
+				? tempoMainnet
+				: getTempoEnv() === 'nextfork'
+					? tempoNextfork
+					: getTempoEnv() === 'devnet'
+						? tempoDevnet
+						: getTempoEnv() === 'testnet'
+							? tempoTestnet
+							: thaiChain,
 	)
 	.server(() =>
-		getTempoEnv() === 'mainnet'
-			? tempoMainnet
-			: getTempoEnv() === 'nextfork'
-				? tempoNextfork
-				: getTempoEnv() === 'devnet'
-					? tempoDevnet
-					: getTempoEnv() === 'testnet'
-						? tempoTestnet
-						: tempoMainnet,
+		getTempoEnv() === 'thaichain'
+			? thaiChain
+			: getTempoEnv() === 'mainnet'
+				? tempoMainnet
+				: getTempoEnv() === 'nextfork'
+					? tempoNextfork
+					: getTempoEnv() === 'devnet'
+						? tempoDevnet
+						: getTempoEnv() === 'testnet'
+							? tempoTestnet
+							: thaiChain,
 	)
 
-const RPC_PROXY_HOSTNAME = 'proxy.tempo.xyz'
-
-function getRpcProxyUrl() {
-	const chain = getTempoChain()
-	return {
-		http: `https://${RPC_PROXY_HOSTNAME}/rpc/${chain.id}`,
-	}
+// Thaichain (ID 7) uses direct RPC; Tempo chains go through proxy.tempo.xyz.
+function isDirectRpc(chainId: number) {
+	return chainId === thaiChain.id
 }
 
-const getFallbackUrls = createIsomorphicFn()
-	.client(() => ({
-		// Browser requests must never hit direct RPC fallbacks.
-		http: [] as string[],
-	}))
-	.server(() => {
-		const chain = getTempoChain()
-		return {
-			http: [...chain.rpcUrls.default.http],
-		}
-	})
-
-const getTempoTransport = createIsomorphicFn()
+const getRpcTransport = createIsomorphicFn()
 	.client(() => {
-		const proxy = getRpcProxyUrl()
+		const chain = getTempoChain()
 
-		// Browser traffic should only hit the RPC proxy. Direct chain RPC endpoints
-		// may require credentials that are only available server-side.
+		// Thaichain: direct RPC, no Tempo proxy.
+		if (isDirectRpc(chain.id)) {
+			return loadBalance(
+				chain.rpcUrls.default.http.map((url) =>
+					rateLimit(http(url), { requestsPerSecond: 20 }),
+				),
+			)
+		}
+
+		// Tempo: browser traffic must hit the Tempo RPC proxy.
 		return loadBalance([
-			rateLimit(http(proxy.http), {
+			rateLimit(http(`https://proxy.tempo.xyz/rpc/${chain.id}`), {
 				requestsPerSecond: 20,
 			}),
 		])
@@ -80,28 +80,22 @@ const getTempoTransport = createIsomorphicFn()
 	.server(() => {
 		const chain = getTempoChain()
 
-		// Tempo API RPC passthrough (mainnet + testnet; requires an API key).
-		const apiKey = serverEnv.TEMPO_API_KEY
-		if (
-			apiKey &&
-			(chain.id === tempoMainnet.id || chain.id === tempoTestnet.id)
-		)
-			return http(`${tempoApiUrl}/rpc/${chain.id}`, {
-				fetchOptions: { headers: { 'tempo-api-key': apiKey } },
-			})
+		// Thaichain: direct RPC + fallbacks.
+		if (isDirectRpc(chain.id)) {
+			return loadBalance(chain.rpcUrls.default.http.map((url) => http(url)))
+		}
 
-		const proxy = getRpcProxyUrl()
-		const fallbackUrls = getFallbackUrls()
+		// Tempo: proxy + direct chain RPC fallback.
 		return loadBalance([
-			http(proxy.http),
-			...fallbackUrls.http.map((url) => http(url)),
+			http(`https://proxy.tempo.xyz/rpc/${chain.id}`),
+			...chain.rpcUrls.default.http.map((url) => http(url)),
 		])
 	})
 
 export function getWagmiConfig() {
 	if (wagmiConfigSingleton) return wagmiConfigSingleton
 	const chain = getTempoChain()
-	const transport = getTempoTransport()
+	const transport = getRpcTransport()
 
 	wagmiConfigSingleton = createConfig({
 		ssr: true,
@@ -127,7 +121,7 @@ export const getWagmiStateSSR = createServerFn().handler(() => {
 // Batched HTTP client for bulk RPC operations
 export function getBatchedClient() {
 	const chain = getTempoChain()
-	const transport = getTempoTransport()
+	const transport = getRpcTransport()
 
 	return createPublicClient({ chain, transport }).extend(tempoActions())
 }

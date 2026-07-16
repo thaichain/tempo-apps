@@ -11,7 +11,12 @@ const clientEnvSchema = z.object({
 
 export const clientEnv = clientEnvSchema.parse(import.meta.env)
 
-export type TempoEnv = 'testnet' | 'mainnet' | 'devnet' | 'nextfork'
+export type TempoEnv =
+	| 'testnet'
+	| 'mainnet'
+	| 'devnet'
+	| 'nextfork'
+	| 'thaichain'
 
 export function inferTempoEnvFromHostname(
 	hostname: string | undefined,
@@ -19,6 +24,10 @@ export function inferTempoEnvFromHostname(
 	if (!hostname) return undefined
 
 	const host = hostname.toLowerCase()
+
+	if (host.includes('exp.thaichain.') || host.includes('explorer.thaichain.')) {
+		return 'thaichain'
+	}
 
 	if (
 		host.includes('explorer-mainnet') ||
@@ -60,7 +69,10 @@ export function inferTempoEnvFromHostname(
 }
 
 function normalizeTempoEnv(value: string | undefined): TempoEnv {
-	return value === 'mainnet' || value === 'devnet' || value === 'nextfork'
+	return value === 'mainnet' ||
+		value === 'devnet' ||
+		value === 'nextfork' ||
+		value === 'thaichain'
 		? value
 		: 'testnet'
 }
