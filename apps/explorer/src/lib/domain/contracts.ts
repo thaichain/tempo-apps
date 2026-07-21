@@ -179,12 +179,11 @@ export const tip20ContractRegistry = new Map<Address.Address, ContractInfo>(<
 	[
 		'0x20c0000000000000000000000000000000000000',
 		{
-			name: 'pathUSD',
-			description: 'Non-transferable DEX accounting unit',
+			name: 'TCH',
+			description: 'Thaichain native fee token',
 			abi: Abis.tip20,
 			code: '0xef',
 			category: 'token',
-			docsUrl: 'https://docs.tempo.xyz/documentation/protocol/exchange/pathUSD',
 			address: '0x20c0000000000000000000000000000000000000',
 		},
 	],

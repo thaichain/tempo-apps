@@ -54,8 +54,8 @@ const taggedAccounts: Record<Address.Address, AccountTag> = {
 	},
 	// genesis tip20 tokens
 	'0x20c0000000000000000000000000000000000000': {
-		id: 'genesis-token:pathusd',
-		label: 'pathUSD',
+		id: 'genesis-token:tch',
+		label: 'TCH',
 	},
 	'0x20c0000000000000000000000000000000000001': {
 		id: 'genesis-token:alphausd',

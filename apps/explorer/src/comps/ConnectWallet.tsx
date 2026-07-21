@@ -196,7 +196,7 @@ function ConnectedAddress() {
 			? isTokenListed(TEMPO_CHAIN_ID, TEMPO_FEE_TOKEN)
 			: true
 		if (!showUsdPrefix) return null
-		// Prefer showing only the fee token (pathUSD) balance
+		// Prefer showing only the fee token (TCH) balance
 		const feeTokenBalance = TEMPO_FEE_TOKEN
 			? balanceData.balances.find(
 					(b) =>
