@@ -1,12 +1,7 @@
 # https://www.robotstxt.org/robotstxt.html
+# Allow all pages for social media sharing and SEO
 User-agent: *
-Allow: /$
-Allow: /tokens
-Allow: /token/
-Disallow: /*?a=
-Disallow: /address/
-Disallow: /block/
-Disallow: /blocks
-Disallow: /tx/
-Disallow: /receipt/
+Allow: /
+
+# Block demo pages only
 Disallow: /demo/
