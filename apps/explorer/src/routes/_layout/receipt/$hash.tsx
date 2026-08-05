@@ -328,7 +328,7 @@ export const Route = createFileRoute('/_layout/receipt/$hash')({
 		),
 	}),
 	head: ({ params, loaderData }) => {
-		const title = `Receipt ${params.hash.slice(0, 10)}…${params.hash.slice(-6)} ⋅ Tempo Explorer`
+		const title = `Receipt ${params.hash.slice(0, 10)}…${params.hash.slice(-6)} ⋅ ThaiChain Explorer`
 
 		const description = buildTxDescription(
 			loaderData
@@ -460,9 +460,10 @@ function Component() {
 			: TEMPO_FEE_TOKEN
 				? isTokenListed(TEMPO_CHAIN_ID, TEMPO_FEE_TOKEN)
 				: true
-	const feeDisplay = showUsdFeePrefix
-		? PriceFormatter.format(fee)
-		: PriceFormatter.formatAmountShort(feeRaw)
+	// Show raw value + symbol (like /tx/ page format)
+	const feeDisplay = feePrice
+		? Value.format(feePrice.amount, feePrice.decimals) + ' ' + (feePrice.symbol || '')
+		: feeRaw
 
 	// Inject a streaming payment event when voucher params are present.
 	// For TIP-1028 blocked transfers, the TIP-20 receipt also contains the
@@ -525,9 +526,10 @@ function Component() {
 				: previousTotal !== undefined
 					? previousTotal
 					: total
-	const totalDisplay = showUsdTotalPrefix
-		? PriceFormatter.format(totalDisplayValue)
-		: PriceFormatter.formatAmountShort(String(totalDisplayValue))
+	// Show raw value + symbol (like /tx/ page format)
+	const totalDisplay = totalPrice
+		? Value.format(totalPrice.amount, totalPrice.decimals) + ' ' + (totalPrice.symbol || '')
+		: String(totalDisplayValue ?? 0)
 
 	return (
 		<div className="font-mono text-[13px] flex flex-col items-center justify-center gap-8 pt-16 pb-8 grow print:pt-8 print:pb-0 print:grow-0">
@@ -608,7 +610,7 @@ namespace TextRenderer {
 		const lines: string[] = []
 
 		// Header
-		lines.push(center('TEMPO RECEIPT'))
+		lines.push(center('THAICHAIN RECEIPT'))
 		lines.push('')
 
 		// Transaction details
@@ -651,10 +653,7 @@ namespace TextRenderer {
 					continue
 				hasVisibleFee = true
 				const label = item.symbol ? `Fee (${item.symbol})` : 'Fee'
-				const amount = PriceFormatter.format(item.amount, {
-					decimals: item.decimals,
-					format: 'short',
-				})
+				const amount = Value.format(item.amount, item.decimals) + ' ' + (item.symbol || '')
 				lines.push(leftRight(label.toUpperCase(), amount))
 			}
 

@@ -21,20 +21,11 @@ export function Footer(): React.JSX.Element {
 			<div className="relative flex min-h-[34px] items-center justify-center">
 				<Footer.ThemeToggle />
 				<ul className="text-ui-meta flex items-center justify-center gap-[24px] select-none">
-					<Footer.Link to="https://tempo.xyz" external>
+					<Footer.Link to="https://thaichain.org" external>
 						About
 					</Footer.Link>
-					<Footer.Link to="https://docs.tempo.xyz" external>
-						Docs
-					</Footer.Link>
-					<Footer.Link to="https://github.com/tempoxyz" external>
+					<Footer.Link to="https://github.com/thaichain" external>
 						GitHub
-					</Footer.Link>
-					<Footer.Link
-						to="https://github.com/tempoxyz/tempo-apps/discussions/categories/explorer"
-						external
-					>
-						Feedback
 					</Footer.Link>
 				</ul>
 			</div>

@@ -14,5 +14,5 @@ export const serverEnvSchema = z.object({
 
 export const serverEnv = serverEnvSchema.parse(process.env)
 
-/** Base URL for the Tempo API. */
-export const tempoApiUrl = 'https://api.tempo.xyz'
+/** Base URL for the tidx indexer (ThaiChain). */
+export const tempoApiUrl = 'https://tidx.thaichain.org'

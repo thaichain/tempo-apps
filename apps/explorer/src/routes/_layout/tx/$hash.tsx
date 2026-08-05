@@ -133,7 +133,7 @@ export const Route = createFileRoute('/_layout/tx/$hash')({
 		hash: zHash(),
 	}),
 	head: ({ params, loaderData }) => {
-		const title = `Transaction ${params.hash.slice(0, 10)}…${params.hash.slice(-6)} ⋅ Tempo Explorer`
+		const title = `Transaction ${params.hash.slice(0, 10)}…${params.hash.slice(-6)} ⋅ ThaiChain Explorer`
 		const ogImageUrl = loaderData
 			? buildOgImageUrl(loaderData, params.hash)
 			: `${OG_BASE_URL}/tx/${params.hash}`
@@ -143,7 +143,7 @@ export const Route = createFileRoute('/_layout/tx/$hash')({
 					from: loaderData.receipt.from,
 					events: loaderData.knownEvents ?? [],
 				})
-			: 'View transaction details on Tempo Explorer.'
+			: 'View transaction details on ThaiChain Explorer.'
 
 		return {
 			title,

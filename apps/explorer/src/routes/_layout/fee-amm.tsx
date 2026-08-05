@@ -45,7 +45,7 @@ type FeeAmmTokenSummary = {
 export const Route = createFileRoute('/_layout/fee-amm')({
 	component: FeeAmmPage,
 	head: () => ({
-		meta: [{ title: 'Fee AMM – Tempo Explorer' }],
+		meta: [{ title: 'Fee AMM – ThaiChain Explorer' }],
 	}),
 	loader: ({ context }) =>
 		withLoaderTiming('/_layout/fee-amm', async () =>

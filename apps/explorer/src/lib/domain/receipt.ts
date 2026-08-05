@@ -1,4 +1,5 @@
 import * as Address from 'ox/Address'
+import { Value } from 'ox'
 import { TokenRole } from 'ox/tempo'
 import type { AbiEvent, Log, TransactionReceipt } from 'viem'
 import { parseEventLogs, zeroAddress } from 'viem'
@@ -191,7 +192,7 @@ export namespace LineItems {
 									],
 									left: `Burn ${symbol}`,
 									right: decimals
-										? PriceFormatter.format(amount, decimals)
+										? Value.format(amount, decimals) + " " + (symbol || "")
 										: '-',
 								},
 							}),
@@ -253,7 +254,7 @@ export namespace LineItems {
 									],
 									left: `Mint ${metadata?.symbol ? ` ${metadata.symbol}` : ''}`,
 									right: decimals
-										? `(${PriceFormatter.format(amount, decimals)})`
+										? `(${Value.format(amount, decimals)} ${symbol || ""})`
 										: '',
 								},
 							}),
@@ -319,7 +320,7 @@ export namespace LineItems {
 							},
 							ui: {
 								left: `${symbol} ${feePayer ? `(PAID BY ${HexFormatter.truncate(feePayer)})` : ''}`,
-								right: decimals ? PriceFormatter.format(amount, decimals) : '-',
+								right: decimals ? Value.format(amount, decimals) : '-',
 							},
 						})
 						feeEvents.push(feeLineItem)
@@ -348,7 +349,7 @@ export namespace LineItems {
 								bottom: [...(memo ? [{ left: `Memo: ${memo}` }] : [])],
 								left: `${isMppPayment ? 'MPP Payment' : `Send ${symbol}`} ${to ? `to ${HexFormatter.truncate(to)}` : ''}`,
 								right: decimals
-									? PriceFormatter.format(isCredit ? -amount : amount, decimals)
+									? Value.format(isCredit ? -amount : amount, decimals) + " " + (symbol || "")
 									: '-',
 							},
 						}),
@@ -415,7 +416,7 @@ export namespace LineItems {
 					ui: {
 						left: 'Fee',
 						right: decimals
-							? PriceFormatter.format(amount, { decimals, format: 'short' })
+							? Value.format(amount, decimals)
 							: '-',
 					},
 				}),
@@ -496,7 +497,7 @@ export namespace LineItems {
 			if (!price) continue
 			const { amount, decimals } = price
 			const formatted = decimals
-				? PriceFormatter.format(amount, { decimals, format: 'short' })
+				? Value.format(amount, decimals)
 				: '-'
 			items.totals.push(
 				LineItem.from({

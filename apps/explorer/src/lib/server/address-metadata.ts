@@ -1,12 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
-import { type InferResponseType, parseResponse } from 'hono/client'
 import type { Address } from 'ox'
 import { VirtualAddress } from 'ox/tempo'
 import { getCode } from 'viem/actions'
 import { type AccountType, getAccountType } from '#lib/account'
 import { isTip20Address } from '#lib/domain/tip20'
-import { api } from '#lib/server/tempo-api'
 import {
+	fetchAddressOldestTx,
+	fetchAddressTxStats,
 	fetchTokenTransferBoundaries,
 	fetchVirtualAddressTransferStats,
 } from '#lib/server/tempo-queries'
@@ -15,29 +15,13 @@ import { zAddress } from '#lib/zod'
 import { getBatchedClient, getTempoChain } from '#wagmi.config.ts'
 
 /**
- * Token header stats: exact `holderCount` and the `TokenCreated` timestamp.
- * Transfer boundaries stay on the SQL lane (`fetchTokenTransferBoundaries`) —
- * the API's `include=transferStats` aggregates are silently omitted upstream
- * for the largest tokens.
+ * Stub: Token header stats not available without Tempo API.
  */
 export async function fetchTokenHeaderStats(
-	chainId: number,
-	token: Address.Address,
-): Promise<
-	InferResponseType<(typeof api.v1.tokens)[':token']['$get'], 200> | undefined
-> {
-	return parseResponse(
-		api.v1.tokens[':token'].$get({
-			param: { token },
-			query: {
-				chainId: String(chainId),
-				include: 'createdAt,holderCount',
-			},
-		}),
-	).catch((error) => {
-		console.error(`Failed to fetch token header stats for ${token}:`, error)
-		return undefined
-	})
+	_chainId: number,
+	_token: Address.Address,
+): Promise<undefined> {
+	return undefined
 }
 
 type AddressTxAggregate = {
@@ -77,43 +61,29 @@ export function buildAddressTxMetadata(aggregate: AddressTxAggregate): {
 	}
 }
 
-/** Address activity boundaries and count from structured Tempo API pages. */
+/**
+ * Fetches address tx metadata from tidx SQL queries.
+ * Replaces the Tempo API-based implementation.
+ */
 export async function fetchAddressTxMetadata(
 	chainId: number,
 	address: Address.Address,
 ): Promise<AddressTxAggregate> {
-	const [oldestPage, latestPage] = await Promise.all([
-		parseResponse(
-			api.v1.transactions.$get({
-				query: {
-					address,
-					chainId: String(chainId),
-					include: 'totalCount',
-					limit: '5',
-					order: 'asc',
-				},
-			}),
-		),
-		parseResponse(
-			api.v1.transactions.$get({
-				query: {
-					address,
-					chainId: String(chainId),
-					limit: '5',
-					order: 'desc',
-				},
-			}),
-		),
+	const [txStats, oldestTx] = await Promise.all([
+		fetchAddressTxStats(address, chainId).catch(() => ({
+			count: 0,
+			oldestTimestamp: undefined,
+			latestTimestamp: undefined,
+		})),
+		fetchAddressOldestTx(address, chainId).catch(() => undefined),
 	])
-	const oldest = oldestPage.data[0]
-	const latest = latestPage.data[0]
 
 	return {
-		count: oldestPage.meta?.totalCount,
-		latestTxsBlockTimestamp: latest?.timestamp,
-		oldestTxsBlockTimestamp: oldest?.timestamp,
-		oldestTxHash: oldest?.hash,
-		oldestTxFrom: oldest?.sender,
+		count: txStats.count,
+		latestTxsBlockTimestamp: txStats.latestTimestamp,
+		oldestTxsBlockTimestamp: txStats.oldestTimestamp,
+		oldestTxHash: oldestTx?.hash,
+		oldestTxFrom: oldestTx?.from,
 	}
 }
 
@@ -136,14 +106,6 @@ const metadataCache = new Map<
 	{ promise: Promise<AddressMetadata>; timestamp: number }
 >()
 
-/**
- * Address header/OG metadata (tx counts, holder counts, activity boundaries).
- * Shared by the `/api/address/metadata` route and the `fetchAddressMetadata`
- * server fn so SSR calls it in-process — the Worker cannot fetch its own
- * hostname. Cached briefly (as the in-flight promise, so the loader and
- * `head()` share one upstream round trip): the counts are slow (seconds)
- * upstream and every SSR of an address page needs them.
- */
 export function getAddressMetadata(
 	address: Address.Address,
 ): Promise<AddressMetadata> {
@@ -182,7 +144,6 @@ async function loadAddressMetadata(
 	let response: AddressMetadata
 
 	if (isVirtual) {
-		// One aggregate: exact distinct transfer-tx count + boundaries.
 		const [bytecode, stats] = await Promise.all([
 			bytecodePromise,
 			fetchVirtualAddressTransferStats(address, chainId).catch(() => ({
@@ -200,10 +161,6 @@ async function loadAddressMetadata(
 			createdTimestamp: parseTimestamp(stats.oldestTimestamp),
 		}
 	} else if (isTip20) {
-		// Exact holder count + TokenCreated timestamp from the API;
-		// transfer boundaries in one raw-logs aggregate. The API omits
-		// `holderCount` for tokens it has no holder index for — leave the
-		// count unset there rather than reporting zero.
 		const [bytecode, stats, boundaries] = await Promise.all([
 			bytecodePromise,
 			fetchTokenHeaderStats(chainId, address),
@@ -216,16 +173,14 @@ async function loadAddressMetadata(
 			address,
 			chainId,
 			accountType: getAccountType(bytecode),
-			holdersCount: stats?.holderCount,
+			holdersCount: undefined,
 			lastActivityTimestamp: parseTimestamp(boundaries.latestTimestamp),
 			createdTimestamp: pickTip20CreatedTimestamp({
-				tokenCreatedTimestamp: stats?.createdAt,
+				tokenCreatedTimestamp: undefined,
 				firstTransferTimestamp: boundaries.oldestTimestamp,
 			}),
 		}
 	} else {
-		// Structured Tempo API pages provide the first and latest indexed activity
-		// without the historical RPC binary search previously used for contracts.
 		const [bytecode, stats] = await Promise.all([
 			bytecodePromise,
 			fetchAddressTxMetadata(chainId, address),

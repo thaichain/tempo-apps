@@ -12,6 +12,7 @@ import {
 } from '@tanstack/react-router'
 import * as Address from 'ox/Address'
 import * as Hex from 'ox/Hex'
+import { Value } from 'ox'
 import * as React from 'react'
 import { formatUnits } from 'viem'
 import type { Config } from 'wagmi'
@@ -308,7 +309,7 @@ export const Route = createFileRoute('/_layout/address/$address')({
 				: accountType === 'account'
 					? 'Account'
 					: 'Address'
-		const title = `${label} ${HexFormatter.truncate(params.address as Hex.Hex)} ⋅ Tempo Explorer`
+		const title = `${label} ${HexFormatter.truncate(params.address as Hex.Hex)} ⋅ ThaiChain Explorer`
 
 		let description: string
 		let ogImageUrl: string
@@ -1248,6 +1249,8 @@ function SectionsWrapper(props: {
 												key="fee"
 												gasUsed={transaction.gasUsed}
 												effectiveGasPrice={transaction.effectiveGasPrice}
+												knownEvents={transaction.knownEvents}
+												transaction={transaction}
 											/>,
 											<TransactionTotalCell
 												key="total"
@@ -1784,19 +1787,29 @@ function TransactionDescCell(props: {
 function TransactionFeeCell(props: {
 	gasUsed: string
 	effectiveGasPrice: string
+	knownEvents?: readonly any[]
+	transaction?: any
 }) {
-	const { isTokenListed } = useTokenListMembership()
+	// Use actual fee from Transfer event to feeManager (feeInfo)
+	// Display format matches /tx/ page: "0.000026 TCH"
+	const feeInfo = props.transaction?.feeInfo
+	if (feeInfo) {
+		const fee = BigInt(feeInfo.amount)
+		const formatted = Value.format(fee, feeInfo.decimals)
+		return (
+			<span className="text-tertiary">
+				{formatted} {feeInfo.symbol}
+			</span>
+		)
+	}
+
+	// Fallback: calculate from gas (for chains without feeInfo)
 	const fee =
 		Hex.toBigInt(props.gasUsed as Hex.Hex) *
 		Hex.toBigInt(props.effectiveGasPrice as Hex.Hex)
-	const feeRaw = formatUnits(fee, 18)
-	const showUsdPrefix = TEMPO_FEE_TOKEN
-		? isTokenListed(TEMPO_CHAIN_ID, TEMPO_FEE_TOKEN)
-		: true
-	const feeDisplay = showUsdPrefix
-		? PriceFormatter.format(fee, { decimals: 18, format: 'short' })
-		: PriceFormatter.formatAmountShort(feeRaw)
-	return <span className="text-tertiary">{feeDisplay}</span>
+	const feeDecimals = TEMPO_CHAIN_ID === 7 ? 6 : 18
+	const formatted = formatUnits(fee, feeDecimals)
+	return <span className="text-tertiary">{formatted}</span>
 }
 
 function TransactionTotalCell(props: { transaction: EnrichedTransaction }) {

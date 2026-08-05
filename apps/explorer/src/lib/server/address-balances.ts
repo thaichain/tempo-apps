@@ -1,5 +1,4 @@
 import { createServerFn } from '@tanstack/react-start'
-import { type InferResponseType, parseResponse } from 'hono/client'
 import type { Address } from 'ox'
 import { formatUnits } from 'viem'
 import { getChainId } from 'wagmi/actions'
@@ -10,7 +9,6 @@ import {
 	createCsvDownloadResponse,
 	createTimestampedCsvFilename,
 } from '#lib/server/csv'
-import { api } from '#lib/server/tempo-api'
 import { zAddress } from '#lib/zod'
 import { getWagmiConfig } from '#wagmi.config.ts'
 
@@ -56,64 +54,16 @@ export function createBalancesCsvResponse(params: {
 	})
 }
 
-type BalancesApiResponse = InferResponseType<
-	(typeof api.v1.addresses)[':address']['balances']['$get'],
-	200
->
-
 /**
- * Maps API balance rows (token metadata included) into the page's shape,
- * sorted USD-denominated tokens first by value, then others by raw balance.
+ * Stub: Address balances not available without Tempo API.
+ * Returns empty balances.
  */
-export function mapBalances(data: BalancesApiResponse['data']): TokenBalance[] {
-	return data
-		.map(
-			(item): TokenBalance => ({
-				token: item.token.address,
-				balance: item.amount,
-				name: item.token.name,
-				symbol: item.token.symbol,
-				currency: item.token.currency,
-				decimals: item.token.decimals,
-			}),
-		)
-		.sort((a, b) => {
-			const aIsUsd = a.currency === 'USD'
-			const bIsUsd = b.currency === 'USD'
-
-			if (aIsUsd && bIsUsd) {
-				const aValue = Number(
-					formatUnits(BigInt(a.balance), a.decimals ?? TIP20_DECIMALS),
-				)
-				const bValue = Number(
-					formatUnits(BigInt(b.balance), b.decimals ?? TIP20_DECIMALS),
-				)
-				return bValue - aValue
-			}
-
-			if (aIsUsd) return -1
-			if (bIsUsd) return 1
-
-			return Number(BigInt(b.balance) - BigInt(a.balance))
-		})
-}
-
 export async function fetchAddressBalancesData(params: {
 	address: Address.Address
 	chainId: number
 	maxTokens?: number | undefined
 }): Promise<BalancesResponse> {
-	const { address, chainId } = params
-	const maxTokens = params.maxTokens ?? MAX_TOKENS
-
-	const { data } = await parseResponse(
-		api.v1.addresses[':address'].balances.$get({
-			param: { address },
-			query: { chainId: String(chainId), limit: String(maxTokens) },
-		}),
-	)
-
-	return { balances: mapBalances(data) }
+	return { balances: [] }
 }
 
 export const fetchAddressBalances = createServerFn({ method: 'GET' })

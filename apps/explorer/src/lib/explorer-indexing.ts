@@ -1,19 +1,12 @@
 import type { TempoEnv } from '#lib/env'
 
-export const EXPLORER_ORGANIZATION_ID = 'https://tempo.xyz/#organization'
+export const EXPLORER_ORGANIZATION_ID = 'https://thaichain.org/#organization'
 
 const CANONICAL_EXPLORER_ORIGINS: Partial<Record<TempoEnv, string>> = {
-	mainnet: 'https://explore.tempo.xyz',
-	testnet: 'https://explore.testnet.tempo.xyz',
+	thaichain: 'https://exp.thaichain.org',
 }
 
-const EXPLORER_HOST_REDIRECTS = new Map([
-	['explore.4217.tempo.xyz', 'explore.tempo.xyz'],
-	['explore.42431.tempo.xyz', 'explore.testnet.tempo.xyz'],
-	['explore.mainnet.tempo.xyz', 'explore.tempo.xyz'],
-	['explore.moderato.tempo.xyz', 'explore.testnet.tempo.xyz'],
-	['explore.presto.tempo.xyz', 'explore.tempo.xyz'],
-])
+const EXPLORER_HOST_REDIRECTS = new Map<string, string>()
 
 const NON_INDEXABLE_EXPLORER_HOSTS = new Set([
 	'explore.31318.tempo.xyz',
@@ -81,8 +74,7 @@ export function getExplorerWebApplication(tempoEnv: TempoEnv) {
 	const origin = CANONICAL_EXPLORER_ORIGINS[tempoEnv]
 	if (!origin) return undefined
 
-	const name =
-		tempoEnv === 'testnet' ? 'Tempo Testnet Explorer' : 'Tempo Explorer'
+	const name = 'ThaiChain Explorer'
 
 	return {
 		'@context': 'https://schema.org',
@@ -90,8 +82,8 @@ export function getExplorerWebApplication(tempoEnv: TempoEnv) {
 		'@type': 'WebApplication',
 		applicationCategory: 'DeveloperApplication',
 		description:
-			'Explore and analyze blocks, transactions, contracts, and tokens on Tempo.',
-		isPartOf: { '@id': 'https://tempo.xyz/#website' },
+			'Explore and analyze blocks, transactions, contracts, and tokens on ThaiChain.',
+		isPartOf: { '@id': 'https://thaichain.org/#website' },
 		name,
 		operatingSystem: 'Web',
 		provider: { '@id': EXPLORER_ORGANIZATION_ID },

@@ -5,13 +5,13 @@ import { getRequestUrl } from '@tanstack/react-start/server'
 const clientEnvSchema = z.object({
 	CONTRACT_VERIFICATION_API_BASE_URL: z.prefault(
 		z.url(),
-		'https://contracts.tempo.xyz',
+		'https://contracts.thaichain.org',
 	),
 })
 
 export const clientEnv = clientEnvSchema.parse(import.meta.env)
 
-export type TempoEnv = 'testnet' | 'mainnet' | 'devnet' | 'nextfork'
+export type TempoEnv = 'testnet' | 'mainnet' | 'devnet' | 'nextfork' | 'thaichain'
 
 export function inferTempoEnvFromHostname(
 	hostname: string | undefined,
@@ -19,6 +19,10 @@ export function inferTempoEnvFromHostname(
 	if (!hostname) return undefined
 
 	const host = hostname.toLowerCase()
+
+	if (host.includes('exp.thaichain.') || host.includes('explorer.thaichain.')) {
+		return 'thaichain'
+	}
 
 	if (
 		host.includes('explorer-mainnet') ||
@@ -60,7 +64,10 @@ export function inferTempoEnvFromHostname(
 }
 
 function normalizeTempoEnv(value: string | undefined): TempoEnv {
-	return value === 'mainnet' || value === 'devnet' || value === 'nextfork'
+	return value === 'mainnet' ||
+		value === 'devnet' ||
+		value === 'nextfork' ||
+		value === 'thaichain'
 		? value
 		: 'testnet'
 }

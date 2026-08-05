@@ -31,6 +31,30 @@ export const logoUriAbi = [
 	},
 ] as const
 
+const erc20MetadataAbi = [
+	{
+		type: 'function',
+		name: 'symbol',
+		stateMutability: 'view',
+		inputs: [],
+		outputs: [{ type: 'string' }],
+	},
+	{
+		type: 'function',
+		name: 'decimals',
+		stateMutability: 'view',
+		inputs: [],
+		outputs: [{ type: 'uint8' }],
+	},
+	{
+		type: 'function',
+		name: 'name',
+		stateMutability: 'view',
+		inputs: [],
+		outputs: [{ type: 'string' }],
+	},
+] as const
+
 export function resolveLogoURI(logoURI: string | null | undefined) {
 	if (!logoURI) return undefined
 	const trimmed = logoURI.trim()
@@ -58,6 +82,42 @@ export async function fetchLogoURI(
 	return typeof logoURI === 'string' ? logoURI : undefined
 }
 
+/**
+ * Fetches token metadata using standard ERC20 calls (symbol, decimals, name).
+ * Falls back gracefully if any call fails.
+ * Replaces the Tempo-specific Actions.token.getMetadata which doesn't work on ThaiChain.
+ */
+async function getStandardTokenMetadata(
+	config: Config,
+	token: Address.Address,
+): Promise<Metadata> {
+	const [symbol, decimals, name] = await Promise.all([
+		readContract(config, {
+			address: token,
+			abi: erc20MetadataAbi,
+			functionName: 'symbol',
+		}).catch(() => ''),
+		readContract(config, {
+			address: token,
+			abi: erc20MetadataAbi,
+			functionName: 'decimals',
+		}).catch(() => 18),
+		readContract(config, {
+			address: token,
+			abi: erc20MetadataAbi,
+			functionName: 'name',
+		}).catch(() => ''),
+	])
+
+	return {
+		symbol: (symbol as string) || '',
+		decimals: Number(decimals),
+		name: (name as string) || '',
+		currency: '',
+		totalSupply: '0',
+	} as Metadata
+}
+
 export async function metadataFromLogs(
 	logs: Log[],
 ): Promise<GetTip20MetadataFn> {
@@ -69,15 +129,19 @@ export async function metadataFromLogs(
 
 	const config = getWagmiConfig()
 
-	// TODO: investigate & consider batch/multicall
+	// Use standard ERC20 calls instead of Tempo-specific precompile
 	const metadataResults = await Promise.all(
 		tip20Addresses.map((token) =>
-			Actions.token.getMetadata(config as Config, { token }),
+			getStandardTokenMetadata(config as Config, token as Address.Address).catch(
+				() => undefined as unknown as Metadata,
+			),
 		),
 	)
 	const map = new Map<string, Metadata>()
-	for (const [index, address] of tip20Addresses.entries())
-		map.set(address.toLowerCase(), metadataResults[index])
+	for (const [index, address] of tip20Addresses.entries()) {
+		const metadata = metadataResults[index]
+		if (metadata) map.set(address.toLowerCase(), metadata)
+	}
 
 	return (address: Address.Address) => map.get(address.toLowerCase())
 }

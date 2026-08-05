@@ -317,17 +317,8 @@ export function Receipt(props: Receipt.Props) {
 						<div className="flex flex-col gap-2 px-[20px] py-[16px] font-mono text-[13px] leading-4">
 							{showFeeBreakdown
 								? visibleFeeBreakdown.map((item, index) => {
-										const showUsdPrefix = hasTokenAmount(item)
-											? isUsdPricedToken(TEMPO_CHAIN_ID, item, isTokenListed)
-											: showUsdFeePrefix
-										const formattedAmount = showUsdPrefix
-											? PriceFormatter.format(item.amount, {
-													decimals: item.decimals,
-													format: 'short',
-												})
-											: PriceFormatter.formatAmountShort(
-													Value.format(item.amount, item.decimals),
-												)
+										// Show raw value + symbol (like /tx/ page), not USD conversion
+										const formattedAmount = Value.format(item.amount, item.decimals) + ' ' + (item.symbol || '')
 										return (
 											<div
 												key={`${item.token ?? item.symbol ?? 'fee'}-${index}`}
@@ -380,10 +371,7 @@ export function Receipt(props: Receipt.Props) {
 								<div className="flex justify-between items-center">
 									<span className="text-tertiary">Total</span>
 									<span className="text-right">
-										{totalDisplay ??
-											(showUsdFeePrefix
-												? PriceFormatter.format(total ?? 0, { format: 'short' })
-												: PriceFormatter.formatAmountShort(String(total ?? 0)))}
+										{totalDisplay ?? (total != null ? String(total) : '0')}
 									</span>
 								</div>
 							)}

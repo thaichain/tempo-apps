@@ -134,8 +134,8 @@ export const Route = createFileRoute('/_layout/block/$id')({
 	head: ({ params, loaderData }) => {
 		const blockNumber = loaderData?.block?.number
 		const title = blockNumber
-			? `Block ${blockNumber} \u22c5 Tempo Explorer`
-			: `Block ${params.id} \u22c5 Tempo Explorer`
+			? `Block ${blockNumber} \u22c5 ThaiChain Explorer`
+			: `Block ${params.id} \u22c5 ThaiChain Explorer`
 
 		const search = new URLSearchParams()
 		if (loaderData?.block) {

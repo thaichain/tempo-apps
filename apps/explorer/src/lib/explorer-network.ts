@@ -2,22 +2,15 @@ import type { TempoEnv } from './env'
 
 export const EXPLORER_NETWORK_OPTIONS = [
 	{
-		env: 'mainnet',
-		label: 'Mainnet',
-		host: 'https://explore.tempo.xyz',
+		env: 'thaichain',
+		label: 'Thaichain',
+		host: 'https://exp.thaichain.org',
 		dotClassName: 'bg-positive',
-	},
-	{
-		env: 'testnet',
-		label: 'Testnet',
-		host: 'https://explore.testnet.tempo.xyz',
-		dotClassName: 'bg-amber-400',
 	},
 ] as const
 
 export function getActiveExplorerNetworkOption(tempoEnv: TempoEnv) {
-	if (tempoEnv === 'mainnet') return EXPLORER_NETWORK_OPTIONS[0]
-	if (tempoEnv === 'testnet') return EXPLORER_NETWORK_OPTIONS[1]
+	if (tempoEnv === 'thaichain') return EXPLORER_NETWORK_OPTIONS[0]
 
 	return {
 		env: tempoEnv,

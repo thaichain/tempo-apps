@@ -80,26 +80,26 @@ export const Route = createRootRouteWithContext<{
 				content: 'width=device-width, initial-scale=1',
 			},
 			{
-				title: 'Explore - Tempo',
-			},
-			{
-				name: 'og:title',
-				content: 'Explore - Tempo',
-			},
+					title: 'Explore - ThaiChain',
+				},
+				{
+					name: 'og:title',
+					content: 'Explore - ThaiChain',
+				},
 			{
 				name: 'viewport',
 				content: 'width=device-width, initial-scale=1, maximum-scale=1',
 			},
 			{
-				name: 'description',
-				content:
-					'Explore and analyze blocks, transactions, contracts and more on Tempo.',
-			},
-			{
-				name: 'og:description',
-				content:
-					'Explore and analyze blocks, transactions, contracts and more on Tempo.',
-			},
+					name: 'description',
+					content:
+						'Explore and analyze blocks, transactions, contracts and more on ThaiChain.',
+				},
+				{
+					name: 'og:description',
+					content:
+						'Explore and analyze blocks, transactions, contracts and more on ThaiChain.',
+				},
 			{
 				name: 'og:image',
 				content: `${OG_BASE_URL}/explorer`,

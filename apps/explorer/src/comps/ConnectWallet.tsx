@@ -144,17 +144,17 @@ function ConnectWalletInner({
 								...(blockExplorerUrl
 									? { blockExplorerUrls: [blockExplorerUrl] }
 									: {}),
-								nativeCurrency: { name: 'USD', decimals: 18, symbol: 'USD' },
+								nativeCurrency: { name: 'ThaiChain', decimals: 18, symbol: 'THAI' },
 							},
 						})
 					}
 				>
-					Add Tempo to {connector?.name ?? 'Wallet'}
+					Add ThaiChain to {connector?.name ?? 'Wallet'}
 				</Button>
 			)}
 			{switchChain.isSuccess && (
 				<span className="text-[12px] font-normal text-tertiary whitespace-nowrap">
-					Added Tempo to {connector?.name ?? 'Wallet'}!
+					Added ThaiChain to {connector?.name ?? 'Wallet'}!
 				</span>
 			)}
 			<SignOut />

@@ -9,11 +9,12 @@
 	},
 	"scripts": {
 		"postinstall": "pnpm gen:types",
-		"dev": "pnpm dev:testnet",
+		"dev": "pnpm dev:thaichain",
 		"dev:devnet": "VITE_TEMPO_ENV='devnet' vite dev --port 3000",
 		"dev:nextfork": "VITE_TEMPO_ENV='nextfork' vite dev --port 3000",
 		"dev:testnet": "VITE_TEMPO_ENV='testnet' vite dev --port 3000",
 		"dev:mainnet": "VITE_TEMPO_ENV='mainnet' vite dev --port 3000",
+		"dev:thaichain": "VITE_TEMPO_ENV='thaichain' vite dev --port 3000",
 		"build": "vite build",
 		"bundle:analyze": "ANALYZE=true pnpm build && open .sonda/sonda_1.html",
 		"bundle:analyze:json": "ANALYZE_JSON=true pnpm build",
