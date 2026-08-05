@@ -5,22 +5,27 @@
 	"compatibility_date": "2025-12-17",
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": {
-		"EXPLORER_URL": "https://explorer.tempo.xyz"
+		"EXPLORER_URL": "https://exp.thaichain.org"
 	},
 	"assets": {
 		"directory": "./public",
 		"binding": "ASSETS"
 	},
-	"ratelimits": [
-		{
-			"name": "REQUESTS_RATE_LIMITER",
-			"namespace_id": "1001",
-			"simple": {
-				"limit": 30,
-				"period": 10
+	"env": {
+		"thaichain": {
+			"name": "og-thaichain",
+			"routes": [
+				{
+					"custom_domain": true,
+					"zone_name": "thaichain.org",
+					"pattern": "og.thaichain.org"
+				}
+			],
+			"vars": {
+				"EXPLORER_URL": "https://exp.thaichain.org"
 			}
 		}
-	],
+	},
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1

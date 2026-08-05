@@ -4,7 +4,7 @@ const FONT_MONO_URL =
 	'https://unpkg.com/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2'
 const FONT_INTER_URL =
 	'https://unpkg.com/@fontsource/inter/files/inter-latin-500-normal.woff2'
-const TOKENLIST_ICON_URL = 'https://tokenlist.tempo.xyz/icon'
+const TOKENLIST_ICON_URL = 'https://tokenlist.thaichain.org/icon'
 
 interface ImageCache {
 	bgTx: ArrayBuffer

@@ -51,7 +51,7 @@ const rateLimiter = createMiddleware<{ Bindings: Cloudflare.Env }>(
 )
 
 const isNotProd = (c: { req: { url: string } }) =>
-	new URL(c.req.url).hostname !== 'og.tempo.xyz'
+	new URL(c.req.url).hostname !== 'og.thaichain.org'
 
 const cacheMiddleware = cache({
 	cacheName: 'og-images',
@@ -68,7 +68,7 @@ app.onError((error, context) => {
 })
 
 app.get('/favicon.ico', (context) =>
-	context.redirect('https://docs.tempo.xyz/icon-light.png'),
+	context.redirect('https://exp.thaichain.org/favicon-light.svg'),
 )
 
 app
