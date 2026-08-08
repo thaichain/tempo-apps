@@ -76,7 +76,7 @@ import {
 	getContractInfo,
 } from '#lib/domain/contracts'
 import * as Tip20 from '#lib/domain/tip20'
-import { HexFormatter, PriceFormatter } from '#lib/formatting'
+import { DateFormatter, HexFormatter, PriceFormatter } from '#lib/formatting'
 import { useIsMounted, useMediaQuery } from '#lib/hooks'
 import {
 	buildAddressDescription,
@@ -92,7 +92,7 @@ import {
 	transfersQueryOptions,
 } from '#lib/queries/tokens'
 import { areUsdPricedTokens } from '#lib/pricing'
-import { fetchAddressMetadata } from '#lib/server/address-metadata'
+import { getAddressMetadata } from '#lib/server/address-metadata'
 import { getFeeTokenForChain } from '#lib/fee-token'
 import { getTempoChain, getWagmiConfig } from '#wagmi.config.ts'
 import type { EnrichedTransaction } from '#routes/api/address/history/$address.ts'
@@ -272,9 +272,27 @@ export const Route = createFileRoute('/_layout/address/$address')({
 			// timeout and delays the entire HTML response.
 			const transactionsData: HistoryResponse | undefined = undefined
 			const balancesData: BalancesResponse | undefined = undefined
-			const ogMeta:
-				| Awaited<ReturnType<typeof fetchAddressMetadata>>
-				| undefined = undefined
+			const ogMeta = await getAddressMetadata(address).catch(() => undefined)
+			// Compute TCH balance from tidx for OG image
+			const ogTchBalance = await (async () => {
+				try {
+					const { tidx } = await import('#lib/server/tempo-queries-provider')
+					const addr = address.toLowerCase()
+					const TRANSFER_SIG = 'event Transfer(address indexed from, address indexed to, uint256 tokens)'
+					const inflowQ = `SELECT sum(tokens) as total FROM transfer WHERE address = '0x20c0000000000000000000000000000000000000' AND "to" = '${addr}'`
+					const outflowQ = `SELECT sum(tokens) as total FROM transfer WHERE address = '0x20c0000000000000000000000000000000000000' AND "from" = '${addr}'`
+					const [inflowResult, outflowResult] = await Promise.all([
+						tidx.fetch({ chainId: 7, query: inflowQ, signatures: [TRANSFER_SIG] }).catch(() => null),
+						tidx.fetch({ chainId: 7, query: outflowQ, signatures: [TRANSFER_SIG] }).catch(() => null),
+					])
+					const inflow = (inflowResult?.rows?.[0] as Record<string, unknown> | undefined)?.total ?? 0
+					const outflow = (outflowResult?.rows?.[0] as Record<string, unknown> | undefined)?.total ?? 0
+					const balance = BigInt(inflow as string | number | bigint) - BigInt(outflow as string | number | bigint)
+					return balance > 0n ? balance : undefined
+				} catch {
+					return undefined
+				}
+			})()
 
 			return {
 				live,
@@ -292,6 +310,7 @@ export const Route = createFileRoute('/_layout/address/$address')({
 				transactionsData,
 				balancesData,
 				ogMeta,
+				ogTchBalance,
 			}
 		}),
 	head: ({ params, loaderData }) => {
@@ -349,10 +368,22 @@ export const Route = createFileRoute('/_layout/address/$address')({
 				created: undefined,
 			})
 		} else {
-			const txCount = 0
-			let lastActive: string | undefined
-			let created: string | undefined
-			const holdings = '—'
+			const ogData = loaderData?.ogMeta
+			const txCount = ogData?.txCount ?? 0
+			const lastActive = ogData?.lastActivityTimestamp
+				? DateFormatter.format(BigInt(ogData.lastActivityTimestamp))
+				: undefined
+			const created = ogData?.createdTimestamp
+				? DateFormatter.format(BigInt(ogData.createdTimestamp))
+				: undefined
+			// Compute holdings from token balances (native TCH balance as primary)
+			const ogBalances = loaderData?.ogBalances?.balances
+			const tchBalance = ogBalances?.find(
+				(b) => b.token?.toLowerCase() === '0x20c0000000000000000000000000000000000000'
+			)
+			const holdings = tchBalance
+				? `${Number(formatUnits(BigInt(tchBalance.balance), tchBalance.decimals ?? 6)).toLocaleString('en-US', { maximumFractionDigits: 0 })} TCH`
+				: '—'
 
 			description = buildAddressDescription(
 				{ holdings, txCount },
@@ -635,7 +666,7 @@ function AccountCardWithTimestamps(props: {
 	address: Address.Address
 	assetsData: AssetData[]
 	accountType?: AccountType
-	addressMetadata?: Awaited<ReturnType<typeof fetchAddressMetadata>>
+	addressMetadata?: Awaited<ReturnType<typeof getAddressMetadata>>
 	isToken?: boolean
 	tokenLogoURI?: string | undefined
 	tokenMetadata?: TokenMetadata | null
