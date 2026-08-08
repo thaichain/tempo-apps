@@ -1,0 +1,21 @@
+{
+  "$schema": "https://esm.sh/gh/uniswap/token-lists/src/tokenlist.schema.json",
+  "name": "Your Chain",
+  "logoURI": "https://raw.githubusercontent.com/tokclaw/assets/refs/heads/main/tok-logo-2.png",
+  "timestamp": "2026-04-10T00:00:00Z",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "tokens": [
+    {
+      "name": "pathFEE",
+      "symbol": "FEE",
+      "decimals": 6,
+      "chainId": 7447,
+      "address": "0x20c0000000000000000000000000000000000000",
+      "logoURI": "https://raw.githubusercontent.com/tokclaw/assets/refs/heads/main/tok-logo-2.png"
+    }
+  ]
+}

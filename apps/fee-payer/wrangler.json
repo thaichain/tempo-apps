@@ -166,6 +166,46 @@
 					}
 				}
 			]
+		},
+		"thaichain": {
+			"name": "fee-payer-thaichain",
+			"routes": [
+				{
+					"pattern": "sponsor.thaichain.org",
+					"zone_name": "thaichain.org",
+					"custom_domain": true
+				}
+			],
+			"workers_dev": false,
+			"vars": {
+				"ALLOWED_ORIGINS": "*",
+				"TEMPO_ENV": "thaichain",
+				"TEMPO_RPC_URL": "https://rpc.thaichain.org"
+			},
+			"kv_namespaces": [
+				{
+					"binding": "SponsorApiKeyStore",
+					"id": "9596623169a24a1ba43ad266d5b42e74"
+				}
+			],
+			"ratelimits": [
+				{
+					"name": "AddressRateLimiter",
+					"namespace_id": "888",
+					"simple": {
+						"limit": 30,
+						"period": 60
+					}
+				},
+				{
+					"name": "KeyedAddressRateLimiter",
+					"namespace_id": "889",
+					"simple": {
+						"limit": 1000,
+						"period": 60
+					}
+				}
+			]
 		}
 	}
 }

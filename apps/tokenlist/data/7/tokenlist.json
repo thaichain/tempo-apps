@@ -1,0 +1,35 @@
+{
+  "$schema": "https://esm.sh/gh/uniswap/token-lists/src/tokenlist.schema.json",
+  "name": "ThaiChain",
+  "logoURI": "https://esm.sh/gh/tempoxyz/tempo-apps/apps/tokenlist/data/7/icon.svg",
+  "timestamp": "2026-08-05T00:00:00Z",
+  "version": {
+    "major": 1,
+    "minor": 1,
+    "patch": 0
+  },
+  "tokens": [
+    {
+      "name": "TCH TOKEN",
+      "symbol": "TCH",
+      "decimals": 6,
+      "chainId": 7,
+      "address": "0x20c0000000000000000000000000000000000000",
+      "logoURI": "https://esm.sh/gh/tempoxyz/tempo-apps/apps/tokenlist/data/7/icons/0x20c0000000000000000000000000000000000000.svg",
+      "extensions": {
+        "chain": "thaichain"
+      }
+    },
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": 6,
+      "chainId": 7,
+      "address": "0x20c0000000000000000000003D2B4e7BCE39Ad58",
+      "logoURI": "https://esm.sh/gh/tempoxyz/tempo-apps/apps/tokenlist/data/7/icons/0x20c0000000000000000000003d2b4e7bce39ad58.svg",
+      "extensions": {
+        "chain": "thaichain"
+      }
+    }
+  ]
+}

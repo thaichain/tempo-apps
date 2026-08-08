@@ -12,7 +12,6 @@ import { admin } from './lib/admin.js'
 import { apiKeyMiddleware } from './lib/api-key-middleware.js'
 import { enqueueSponsorshipIntent } from './lib/billing.js'
 import { tempoChain } from './lib/chain.js'
-import { pathUsd } from './lib/consts.js'
 import { metrics } from './lib/observability/metrics.js'
 import { httpMetrics, rpcMetrics } from './lib/observability/middleware.js'
 import {
@@ -108,8 +107,8 @@ const relayHandler = Handler.relay({
 	// relay enrichment adds a serial post-fill simulation before responding.
 	feePayer: {
 		account: sponsorAccount,
-		// Always use PathUSD as fee token.
-		feeToken: pathUsd,
+		// Use the fee token from the chain config (pathUsd for Tempo, tchToken for ThaiChain)
+		feeToken: tempoChain.feeToken,
 		name: 'Tempo Sponsor',
 		url: 'https://sponsor.tempo.xyz',
 	},

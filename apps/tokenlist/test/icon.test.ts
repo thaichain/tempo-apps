@@ -22,17 +22,17 @@ function createAssets(files: Record<string, Asset>): Fetcher {
 }
 
 describe('token icon route', () => {
-	it('serves a PNG icon when the token has no SVG asset', async () => {
+	it('serves the token SVG icon', async () => {
 		const response = await app.request(
-			'/icon/4217/0x20c000000000000000000000f047dd7018e50367',
+			'/icon/7/0x20c0000000000000000000000000000000000000',
 			{},
 			{
 				ASSETS: createAssets({
-					'/4217/icons/0x20c000000000000000000000f047dd7018e50367.png': {
-						body: 'png icon',
-						contentType: 'image/png',
+					'/7/icons/0x20c0000000000000000000000000000000000000.svg': {
+						body: 'token icon',
+						contentType: 'image/svg+xml',
 					},
-					'/4217/icons/fallback.svg': {
+					'/7/icons/fallback.svg': {
 						body: 'fallback icon',
 						contentType: 'image/svg+xml',
 					},
@@ -40,17 +40,34 @@ describe('token icon route', () => {
 			},
 		)
 
-		await expect(response.text()).resolves.toBe('png icon')
-		expect(response.headers.get('Content-Type')).toBe('image/png')
+		await expect(response.text()).resolves.toBe('token icon')
+		expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+	})
+
+	it('lowercases the address and strips a .svg suffix', async () => {
+		const response = await app.request(
+			'/icon/7/0x20C0000000000000000000000000000000000000.svg',
+			{},
+			{
+				ASSETS: createAssets({
+					'/7/icons/0x20c0000000000000000000000000000000000000.svg': {
+						body: 'token icon',
+						contentType: 'image/svg+xml',
+					},
+				}),
+			},
+		)
+
+		await expect(response.text()).resolves.toBe('token icon')
 	})
 
 	it('falls back to the default SVG when no token icon exists', async () => {
 		const response = await app.request(
-			'/icon/4217/0x20c000000000000000000000000000000000dead',
+			'/icon/7/0x20c000000000000000000000000000000000dead',
 			{},
 			{
 				ASSETS: createAssets({
-					'/4217/icons/fallback.svg': {
+					'/7/icons/fallback.svg': {
 						body: 'fallback icon',
 						contentType: 'image/svg+xml',
 					},
@@ -60,5 +77,46 @@ describe('token icon route', () => {
 
 		await expect(response.text()).resolves.toBe('fallback icon')
 		expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+	})
+
+	it('returns 404 for an unsupported chain', async () => {
+		const response = await app.request(
+			'/icon/9999/0x20c0000000000000000000000000000000000000',
+			{},
+			{ ASSETS: createAssets({}) },
+		)
+
+		expect(response.status).toBe(404)
+	})
+})
+
+describe('token list route', () => {
+	it('serves the static tokenlist.json for a chain', async () => {
+		const list = { name: 'ThaiChain', tokens: [] }
+		const response = await app.request(
+			'/list/7',
+			{},
+			{
+				ASSETS: createAssets({
+					'/7/tokenlist.json': {
+						body: JSON.stringify(list),
+						contentType: 'application/json',
+					},
+				}),
+			},
+		)
+
+		expect(response.status).toBe(200)
+		await expect(response.json()).resolves.toEqual(list)
+	})
+
+	it('returns 404 when the chain has no tokenlist.json', async () => {
+		const response = await app.request(
+			'/list/7',
+			{},
+			{ ASSETS: createAssets({}) },
+		)
+
+		expect(response.status).toBe(404)
 	})
 })

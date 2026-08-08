@@ -21,7 +21,7 @@ export default defineConfig((config) => {
 		resolve: {
 			tsconfigPaths: true,
 		},
-		plugins: [cloudflare(), processIcons(), copyAssetsPlugin()],
+		plugins: [cloudflare(), copyAssetsPlugin()],
 		define: {
 			__BUILD_VERSION__: JSON.stringify(commitSha ?? Date.now().toString()),
 		},
@@ -35,14 +35,10 @@ export default defineConfig((config) => {
 	}
 })
 
-/** copies ./data to dist/tokenlist/data */
 function copyAssetsPlugin(): Plugin {
 	return {
 		name: 'copy-assets',
 		apply: 'build',
-		applyToEnvironment(environment) {
-			return environment.name === 'tokenlist'
-		},
 		enforce: 'post',
 		async closeBundle() {
 			const cwd = process.cwd()
@@ -78,27 +74,6 @@ function copyAssetsPlugin(): Plugin {
 					'Verify assets in wrangler.json:',
 					verifyContent.includes('"assets"'),
 				)
-			}
-		},
-	}
-}
-
-// runs `node ./scripts/svg2g.ts` before build
-function processIcons(): Plugin {
-	return {
-		name: 'process-icons',
-		apply: 'build',
-		enforce: 'pre',
-		async buildStart() {
-			try {
-				console.log('Processing SVG icons...')
-				NodeChildProcess.execSync('node ./scripts/svg2g.ts', {
-					stdio: 'inherit',
-				})
-				console.log('SVG icons processed successfully.')
-			} catch (error) {
-				console.error('Error processing SVG icons:', error)
-				throw error
 			}
 		},
 	}

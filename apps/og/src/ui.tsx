@@ -270,7 +270,7 @@ const DIVIDER = { height: '1px', backgroundColor: '#d1d5db' }
 
 export function ReceiptCard({ data }: { data: ReceiptData }) {
 	const when = formatDateSmart(data.date, data.time)
-	const feeTokenLabel = data.feeToken || 'pathUSD'
+	const feeTokenLabel = data.feeToken || 'TCH'
 
 	return (
 		<div tw="flex flex-col bg-white relative" style={CARD_BASE}>

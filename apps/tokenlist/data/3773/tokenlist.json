@@ -1,0 +1,242 @@
+{
+  "$schema": "https://esm.sh/gh/uniswap/token-lists/src/tokenlist.schema.json",
+  "name": "PaysoNow",
+  "logoURI": "https://raw.githubusercontent.com/paysonow/assets/refs/heads/main/payso-logo.png",
+  "timestamp": "2026-04-26T18:41:53.736Z",
+  "version": {
+    "major": 1,
+    "minor": 1,
+    "patch": 2
+  },
+  "tokens": [
+    {
+      "name": "Pak USD",
+      "symbol": "PUSD",
+      "decimals": 6,
+      "chainId": 3773,
+      "address": "0x20c0000000000000000000000000000000000000",
+      "logoURI": "https://raw.githubusercontent.com/paysonow/assets/refs/heads/main/payso-logo.png"
+    },
+    {
+      "name": "Sao Mai Solar 2024",
+      "symbol": "SAOMSO124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x3224304c75c5118af069ba7ce0b290acd067e46e",
+      "logoURI": "https://esm.sh/gh/tempoxyz/tempo-apps/apps/tokenlist/data/3773/icons/0x3224304c75c5118af069ba7ce0b290acd067e46e.svg",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "SAOMSO124"
+      }
+    },
+    {
+      "name": "Bac Ha Hydro Project 2022",
+      "symbol": "BACHES122",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0xC20B1b2EC71AB7d2b4D8c4db2B768690a51EA57C",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "BACHES122"
+      }
+    },
+    {
+      "name": "Dak U hydropower project 2022",
+      "symbol": "DAKUES122",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x838ECF1576a8899d7d09fA658Bd5d4c0f497E397",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "DAKUES122"
+      }
+    },
+    {
+      "name": "Hoang Hai Wind 2023",
+      "symbol": "HOANWI123",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x9aAFE22e91521A75c29954D09Bb74DF388CF1706",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "HOANWI123"
+      }
+    },
+    {
+      "name": "Ham Kiem 1 Solar Power Project 2023",
+      "symbol": "HAMKES123",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x45f89F95e44D7f413F645728266460eb697c916A",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "HAMKES123"
+      }
+    },
+    {
+      "name": "Thuan Nam Duc Long Solar Power Project 2023",
+      "symbol": "DUCLES123",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x60399d0b082508E28d0E03901C9EF19EA8729bCB",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "DUCLES123"
+      }
+    },
+    {
+      "name": "Tai Tam Wind Power Project 2023",
+      "symbol": "TAITWI123",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x81eD9cBbed5e91Ee11A3639F6BEaf6c2A78ADE1c",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TAITWI123"
+      }
+    },
+    {
+      "name": "Tay Nguyen Wind 2024",
+      "symbol": "TAYNWI124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0xf919C5FF7721726882FA53Fe296D083fF5a49b91",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TAYNWI124"
+      }
+    },
+    {
+      "name": "Dong Hai 1 Wind 2024",
+      "symbol": "DONGWI324",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x66F558C662Ac7AA754A592D5F51c525Cb3C15554",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "DONGWI324"
+      }
+    },
+    {
+      "name": "No.5 Ninh Thuan Wind Power Project 2024",
+      "symbol": "NO.5WI124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0xb568d6F2aedEBFE388740806C0265bE3b1CA174a",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "NO.5WI124"
+      }
+    },
+    {
+      "name": "Trung Nam Wind 2024",
+      "symbol": "TRUNWI124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x7B733A15e71C1E6f04f165956cdF88a2a644A84c",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TRUNWI124"
+      }
+    },
+    {
+      "name": "Trung Nam Thuan Nam Solar 2024",
+      "symbol": "TRUNES124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x65f107eBD6f7d3D4f373aeA1E1517EeDDAb51dBE",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TRUNES124"
+      }
+    },
+    {
+      "name": "Trung Nam Solar 2024",
+      "symbol": "TRUNES424",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x3f517F9FaDb6415191A53dAcdeFc935e57e41b8c",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TRUNES424"
+      }
+    },
+    {
+      "name": "Tai Tam Wind Power Project 2024",
+      "symbol": "TAITWI124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x5fC469b458e2f598912533c7A08205B20530DBBC",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TAITWI124"
+      }
+    },
+    {
+      "name": "Ham Kiem 1 Solar Power Project 2024",
+      "symbol": "HAMKES124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x33777536Df588e8FdA2F1BBb5aa570c2B527DEC9",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "HAMKES124"
+      }
+    },
+    {
+      "name": "Trung Nam Tra Vinh Solar 2024",
+      "symbol": "TRUNES324",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0xd49B7CB086a17E46AA420cf52eCC8C1061fa4dD4",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "TRUNES324"
+      }
+    },
+    {
+      "name": "Thuan Nam Duc Long Solar Power Project 2024",
+      "symbol": "DUCLES124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x5498F381834e68859032D49516cd4f6918de6E14",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "DUCLES124"
+      }
+    },
+    {
+      "name": "Hoang Hai Wind 2024",
+      "symbol": "HOANWI124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x7885d6A3b2002ab278491fEA10522f7bA58A516c",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "HOANWI124"
+      }
+    },
+    {
+      "name": "Europlast Long An Solar 2024",
+      "symbol": "EUROSO124",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x83f1a935008a4e01Cc755d453155572Fdb921cf7",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "EUROSO124"
+      }
+    },
+    {
+      "name": "MGW Token",
+      "symbol": "MGW",
+      "decimals": 18,
+      "chainId": 3773,
+      "address": "0x3851eC8c99d82d8BA0b5A8834052fAed177f591f",
+      "extensions": {
+        "chain": "paysonow",
+        "label": "MGW"
+      }
+    }
+  ]
+}
