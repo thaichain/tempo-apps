@@ -3,6 +3,7 @@ import {
 	tempo as tempoMainnet,
 	tempoModerato as tempoTestnet,
 } from '@wagmi/core/chains'
+import { defineChain } from 'viem'
 
 const verifierUrl =
 	import.meta.env?.VITE_VERIFIER_URL ?? 'https://contracts.tempo.xyz'
@@ -22,15 +23,39 @@ export const tempoTestnetExtended = tempoTestnet.extend({
 	feeToken: '0x20c0000000000000000000000000000000000001',
 })
 
-/** Static Tempo chains -- always available, cannot be overridden by dynamic config. */
+export const thaifiExtended = defineChain({
+	id: 17,
+	name: 'ThaiFi',
+	nativeCurrency: {
+		name: 'pathUSD',
+		symbol: 'pathUSD',
+		decimals: 6,
+	},
+	rpcUrls: {
+		default: {
+			http: ['https://tidx.pakxe.net/thaifi/rpc'],
+		},
+	},
+	blockExplorers: {
+		default: {
+			name: 'ThaiFi Explorer',
+			url: 'https://explorer-thaifi.tokenine.workers.dev',
+		},
+	},
+	feeToken: '0x20c0000000000000000000000000000000000000',
+})
+
+/** Static chains -- always available, cannot be overridden by dynamic config. */
 export const staticChains = [
 	tempoDevnetExtended,
 	tempoTestnetExtended,
 	tempoMainnetExtended,
+	thaifiExtended,
 ] as const
 
 export const chainFeeTokens = {
 	[tempoDevnet.id]: tempoDevnetExtended.feeToken,
 	[tempoTestnet.id]: tempoTestnetExtended.feeToken,
 	[tempoMainnet.id]: tempoMainnetExtended.feeToken,
+	[17]: thaifiExtended.feeToken,
 } as const

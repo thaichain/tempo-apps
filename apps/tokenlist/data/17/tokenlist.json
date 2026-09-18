@@ -1,0 +1,24 @@
+{
+  "$schema": "https://esm.sh/gh/uniswap/token-lists/src/tokenlist.schema.json",
+  "name": "ThaiFi",
+  "logoURI": "https://esm.sh/gh/tempoxyz/tempo-apps/apps/tokenlist/data/17/icon.svg",
+  "timestamp": "2026-09-18T00:00:00Z",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "tokens": [
+    {
+      "name": "pathUSD",
+      "symbol": "pathUSD",
+      "decimals": 6,
+      "chainId": 17,
+      "address": "0x20c0000000000000000000000000000000000000",
+      "logoURI": "https://esm.sh/gh/tempoxyz/tempo-apps/apps/tokenlist/data/17/icons/0x20c0000000000000000000000000000000000000.svg",
+      "extensions": {
+        "chain": "thaifi"
+      }
+    }
+  ]
+}

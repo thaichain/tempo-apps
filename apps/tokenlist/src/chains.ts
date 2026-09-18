@@ -52,12 +52,29 @@ export const yourChain = defineChain({
 	},
 })
 
+export const thaifi = defineChain({
+	id: 17,
+	name: 'ThaiFi',
+	nativeCurrency: {
+		name: 'pathUSD',
+		symbol: 'pathUSD',
+		decimals: 6,
+	},
+	rpcUrls: {
+		default: {
+			http: ['https://tidx.pakxe.net/thaifi/rpc'],
+		},
+	},
+	feeToken: '0x20c0000000000000000000000000000000000000',
+})
+
 export const CHAIN_IDS = [
 	tempoDevnet.id,
 	tempoTestnet.id,
 	tempoMainnet.id,
 	paysonow.id,
 	thaiChain.id,
+	thaifi.id,
 	yourChain.id,
 ] as const
 
@@ -67,5 +84,6 @@ export const chains = {
 	[tempoMainnet.id]: tempoMainnet,
 	[paysonow.id]: paysonow,
 	[thaiChain.id]: thaiChain,
+	[thaifi.id]: thaifi,
 	[yourChain.id]: yourChain,
 }
