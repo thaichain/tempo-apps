@@ -161,10 +161,14 @@ export default defineConfig((config) => {
 				},
 			},
 		},
-		define: {
-			'import.meta.env.VITE_DATADOG_ALLOWED_TRACING_URLS': JSON.stringify(
-				datadogEnv.VITE_DATADOG_ALLOWED_TRACING_URLS,
-			),
+	define: {
+		'import.meta.env.VITE_CONTRACT_VERIFICATION_API_BASE_URL': JSON.stringify(
+			wranglerVars.VITE_CONTRACT_VERIFICATION_API_BASE_URL ??
+				envConfig.VITE_CONTRACT_VERIFICATION_API_BASE_URL,
+		),
+		'import.meta.env.VITE_DATADOG_ALLOWED_TRACING_URLS': JSON.stringify(
+			datadogEnv.VITE_DATADOG_ALLOWED_TRACING_URLS,
+		),
 			'import.meta.env.VITE_DATADOG_ENABLED': JSON.stringify(
 				datadogEnv.VITE_DATADOG_ENABLED,
 			),

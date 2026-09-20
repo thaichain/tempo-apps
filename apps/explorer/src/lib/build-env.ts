@@ -45,6 +45,10 @@ export const buildEnvSchema = z.object({
 	SENTRY_ORG: z.optional(z.string()),
 	SENTRY_PROJECT: z.optional(z.string()),
 	VITE_BASE_URL: z.prefault(z.string(), ''),
+	VITE_CONTRACT_VERIFICATION_API_BASE_URL: z.prefault(
+		z.string(),
+		'https://contracts.thaichain.org',
+	),
 	VITE_DATADOG_ALLOWED_TRACING_URLS: z.prefault(z.string(), ''),
 	VITE_DATADOG_ENABLED: z.prefault(enabledSchema, 'false'),
 	VITE_DATADOG_ENV: z.optional(z.string()),

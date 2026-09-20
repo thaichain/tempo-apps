@@ -150,11 +150,18 @@ export const Route = createFileRoute('/api/code')({
 				apiUrl.searchParams.set('fields', CONTRACT_SOURCE_FIELDS)
 				const response = await fetch(apiUrl.toString())
 
-				if (!response.ok)
-					return Response.json(
-						{ error: 'Failed to fetch contract code' },
-						{ status: response.status },
-					)
+					if (!response.ok) {
+						if (response.status === 404) {
+							return Response.json(
+								{ error: 'Contract not verified' },
+								{ status: 404 },
+							)
+						}
+						return Response.json(
+							{ error: 'Failed to fetch contract code' },
+							{ status: response.status },
+						)
+					}
 
 				const responseData = await response.json()
 

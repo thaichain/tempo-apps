@@ -23,4 +23,13 @@ export CLOUDFLARE_ENV="$env_name"
 export VITE_TEMPO_ENV="$env_name"
 export NODE_ENV="production"
 
+# Vite bakes import.meta.env at build time — runtime wrangler vars are NOT visible
+# to the bundles. Inline every VITE_* var from the env's wrangler block so e.g.
+# VITE_CONTRACT_VERIFICATION_API_BASE_URL doesn't fall back to the upstream default.
+while IFS='=' read -r key value; do
+	[[ -n "$key" ]] && export "$key=$value"
+done < <(jq -r --arg e "$env_name" \
+	'(.env[$e].vars // {}) | to_entries[] | select(.key | startswith("VITE_")) | "\(.key)=\(.value)"' \
+	"$(dirname "$0")/../wrangler.json")
+
 pnpm vite build --mode="$env_name"
